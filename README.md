@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Realtime Glyph Scramble</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=IBM+Plex+Mono:wght@300;600&family=JetBrains+Mono:wght@300;600&family=Space+Grotesk:wght@300;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --font: Inter;
+  --size: 16px;
+
+  --theme: 0;
+
+  --bg: calc((1 - var(--theme)) * 0   + var(--theme) * 245);
+  --fg: calc((1 - var(--theme)) * 255 + var(--theme) * 20);
+
+  --line: rgba(var(--fg), var(--fg), var(--fg), .18);
+  --muted: rgba(var(--fg), var(--fg), var(--fg), .72);
+  --field-border: rgba(var(--fg), var(--fg), var(--fg), .25);
+  --panel: rgba(var(--fg), var(--fg), var(--fg), .03);
+
+  --accent: #42e8ff;
+  --matrix-green: #00ff6a;
+}
+
+*{ box-sizing:border-box; }
+
+html, body{
+  height:100%;
+  margin:0;
+  background: rgb(var(--bg), var(--bg), var(--bg));
+  color: rgb(var(--fg), var(--fg), var(--fg));
+  font-family: var(--font), system-ui, sans-serif;
+}
+
+.app{
+  height:100vh;
+  display:grid;
+  grid-template-columns: 1fr 2fr;
+}
+
+/* ===== LEFT ===== */
+.left{
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  min-width: 320px;
+}
+
+.topbar{
+  padding:14px;
+  border-bottom:1px solid var(--line);
+}
+
+.settings{
+  padding:16px;
+  overflow:auto;
+}
+
+.section{
+  margin-bottom:18px;
+}
+.section-title{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.25em;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+
+label{
+  display:block;
+  margin-top:10px;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.2em;
+  color:var(--muted);
+}
+
+select, input[type="range"], button.reset{
+  width:100%;
+  margin-top:6px;
+  background: rgb(var(--bg), var(--bg), var(--bg));
+  color: rgb(var(--fg), var(--fg), var(--fg));
+  border:1px solid var(--field-border);
+  padding:8px;
+  font-size:12px;
+}
+
+input[type="range"]{ accent-color: var(--accent); }
+
+.checkbox{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.2em;
+  color:var(--muted);
+}
+
+button.reset{
+  cursor:pointer;
+}
+button.reset:hover{ border-color: var(--accent); }
+
+/* ===== RIGHT ===== */
+.right{
+  height:100vh;
+  display:grid;
+  grid-template-rows:1fr 1fr;
+}
+
+.output{
+  overflow:auto;
+  padding:18px;
+  background: var(--panel);
+  font-family: var(--font), system-ui, sans-serif;
+  font-size: var(--size);
+  letter-spacing:.14em;
+  line-height:1.6;
+  white-space:pre-wrap;
+  border-bottom:1px solid var(--line);
+}
+
+textarea{
+  width:100%;
+  height:100%;
+  resize:none;
+  border:none;
+  outline:none;
+  padding:14px;
+  background: rgb(var(--bg), var(--bg), var(--bg));
+  color: rgb(var(--fg), var(--fg), var(--fg));
+  font-family: var(--font), system-ui, sans-serif;
+  font-size:14px;
+  letter-spacing:.12em;
+}
+
+.char{
+  display:inline-block;
+  will-change: contents, font-family, color, font-size, vertical-align, opacity;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<div class="left">
+
+  <!-- LANGUAGE -->
+  <div class="topbar">
+    <label data-i18n="lblLanguage"></label>
+    <select id="languageSelect">
+      <option value="de">Deutsch</option>
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+      <option value="es">Español</option>
+      <option value="it">Italiano</option>
+      <option value="nl">Nederlands</option>
+      <option value="pl">Polski</option>
+      <option value="pt">Português</option>
+      <option value="sv">Svenska</option>
+      <option value="fi">Suomi</option>
+      <option value="cs">Čeština</option>
+      <option value="ro">Română</option>
+      <option value="bg">Български</option>
+      <option value="ru">Русский</option>
+      <option value="zh">中文（简体）</option>
+      <option value="hi">हिन्दी</option>
+      <option value="ja">日本語</option>
+    </select>
+  </div>
+
+  <div class="settings">
+
+    <!-- TEXT -->
+    <div class="section">
+      <div class="section-title" data-i18n="secText"></div>
+
+      <label data-i18n="lblFont"></label>
+      <select id="fontSelect">
+        <option value="Inter">Inter</option>
+        <option value="Space Grotesk">Space Grotesk</option>
+        <option value="IBM Plex Mono">IBM Plex Mono</option>
+        <option value="JetBrains Mono">JetBrains Mono</option>
+      </select>
+
+      <label data-i18n="lblBaseSize"></label>
+      <input id="size" type="range" min="12" max="42" step="1" value="16">
+    </div>
+
+    <!-- SCRAMBLE -->
+    <div class="section">
+      <div class="section-title" data-i18n="secScramble"></div>
+
+      <label id="speedLabel"></label>
+      <input id="speed" type="range" min="0.5" max="40" step="0.5" value="3">
+
+      <label id="scrambleSizeLabel"></label>
+      <input id="scrambleSize" type="range" min="0.6" max="1.8" step="0.05" value="1">
+
+      <label id="randomTimeLabel"></label>
+      <input id="randomTime" type="range" min="0" max="2" step="0.1" value="0">
+
+      <div class="checkbox">
+        <input id="colorToggle" type="checkbox">
+        <span data-i18n="optColors"></span>
+      </div>
+
+      <div class="checkbox">
+        <input id="superscriptToggle" type="checkbox">
+        <span data-i18n="optSup"></span>
+      </div>
+
+      <div class="checkbox">
+        <input id="sequentialToggle" type="checkbox">
+        <span data-i18n="optSeqPaste"></span>
+      </div>
+
+      <div class="checkbox">
+        <input id="matrixToggle" type="checkbox">
+        <span data-i18n="optMatrix"></span>
+      </div>
+    </div>
+
+    <!-- THEME -->
+    <div class="section">
+      <div class="section-title" data-i18n="secTheme"></div>
+      <label data-i18n="lblTheme"></label>
+      <input id="themeSlider" type="range" min="0" max="1" step="0.01" value="0">
+    </div>
+
+    <!-- RESET -->
+    <div class="section">
+      <div class="section-title" data-i18n="secReset"></div>
+      <button id="resetBtn" class="reset" data-i18n="resetBtn"></button>
+    </div>
+
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="output" id="output"></div>
+  <textarea id="input"></textarea>
+</div>
+
+</div>
+
+<script>
+/* ================= I18N ================= */
+const I18N = {
+  de:{
+    htmlLang:"de", title:"Realtime Glyph Scramble", placeholder:"TEXT EINGEBEN…",
+    lblLanguage:"Sprache", secText:"Text", lblFont:"Schriftart", lblBaseSize:"Grundgröße",
+    secScramble:"Scramble", speed:"Geschwindigkeit (Iterationen / Sekunde)",
+    scrambleSize:"Scramble-Größenfaktor",
+    randomTime:"Zusätzliche zufällige Scramble-Zeit",
+    optColors:"Zufällige Scramble-Farben",
+    optSup:"Scramble hochgestellt",
+    optSeqPaste:"Sequenziell beim Einfügen",
+    optMatrix:"Matrix-Modus",
+    secTheme:"Darstellung", lblTheme:"Dark ↔ Light",
+    secReset:"Aktionen", resetBtn:"Alles löschen"
+  },
+  en:{
+    htmlLang:"en", title:"Realtime Glyph Scramble", placeholder:"TYPE TEXT…",
+    lblLanguage:"Language", secText:"Text", lblFont:"Font", lblBaseSize:"Base Size",
+    secScramble:"Scramble", speed:"Speed (Iterations / Second)",
+    scrambleSize:"Scramble Size Multiplier",
+    randomTime:"Additional Random Scramble Time",
+    optColors:"Random Scramble Colors",
+    optSup:"Superscript Scramble",
+    optSeqPaste:"Sequential on Paste",
+    optMatrix:"Matrix Mode",
+    secTheme:"Appearance", lblTheme:"Dark ↔ Light",
+    secReset:"Actions", resetBtn:"Reset"
+  },
+  fr:{
+    htmlLang:"fr", title:"Scramble de glyphes en temps réel", placeholder:"SAISIR DU TEXTE…",
+    lblLanguage:"Langue", secText:"Texte", lblFont:"Police", lblBaseSize:"Taille de base",
+    secScramble:"Scramble", speed:"Vitesse (itérations / seconde)",
+    scrambleSize:"Taille Scramble",
+    randomTime:"Durée de scramble aléatoire",
+    optColors:"Couleurs aléatoires",
+    optSup:"Exposant",
+    optSeqPaste:"Séquentiel au collage",
+    optMatrix:"Mode Matrix",
+    secTheme:"Apparence", lblTheme:"Sombre ↔ Clair",
+    secReset:"Actions", resetBtn:"Réinitialiser"
+  },
+  es:{
+    htmlLang:"es", title:"Scramble de glifos en tiempo real", placeholder:"ESCRIBE TEXTO…",
+    lblLanguage:"Idioma", secText:"Texto", lblFont:"Fuente", lblBaseSize:"Tamaño base",
+    secScramble:"Scramble", speed:"Velocidad (iteraciones / segundo)",
+    scrambleSize:"Tamaño Scramble",
+    randomTime:"Tiempo adicional de scramble",
+    optColors:"Colores aleatorios",
+    optSup:"Superíndice",
+    optSeqPaste:"Secuencial al pegar",
+    optMatrix:"Modo Matrix",
+    secTheme:"Apariencia", lblTheme:"Oscuro ↔ Claro",
+    secReset:"Acciones", resetBtn:"Restablecer"
+  },
+  ja:{
+    htmlLang:"ja", title:"リアルタイム・グリフスクランブル", placeholder:"テキストを入力…",
+    lblLanguage:"言語", secText:"テキスト", lblFont:"フォント", lblBaseSize:"基本サイズ",
+    secScramble:"スクランブル", speed:"速度（回/秒）",
+    scrambleSize:"スクランブル倍率",
+    randomTime:"追加ランダム時間",
+    optColors:"ランダムカラー",
+    optSup:"上付き",
+    optSeqPaste:"貼り付け時に順次",
+    optMatrix:"マトリックスモード",
+    secTheme:"表示", lblTheme:"ダーク ↔ ライト",
+    secReset:"操作", resetBtn:"すべてクリア"
+  }
+};
+
+/* ================= SCRAMBLE ENGINE ================= */
+const output = document.getElementById("output");
+const input  = document.getElementById("input");
+
+let glyphs=[];
+let speed=3, scrambleSize=1, randomColors=false, superscript=false,
+    sequentialPaste=false, matrixMode=false, maxExtraTime=0;
+
+const NBSP="\u00A0";
+const normalPool="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}<>?/\\|~;:,.";
+const matrixPool="アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789";
+const normalFonts=["Inter","IBM Plex Mono","JetBrains Mono","Space Grotesk"];
+const matrixFont="IBM Plex Mono, monospace";
+
+function rand(arr){ return arr[Math.random()*arr.length|0]; }
+function randColor(){ return `rgb(${Math.random()*255|0},${Math.random()*255|0},${Math.random()*255|0})`; }
+
+class Glyph{
+  constructor(ch, delay=0, hidden=false){
+    this.target=ch;
+    this.delay=delay;
+    this.hidden=hidden;
+    this.span=document.createElement("span");
+    this.span.className="char";
+    this.span.textContent=ch===" "?NBSP:ch;
+    if(hidden) this.span.style.opacity="0";
+    output.appendChild(this.span);
+    this.run();
+  }
+
+  run(){
+    this._token=(this._token||0)+1;
+    const token=this._token;
+
+    const interval = 1000 / speed;
+    const baseIterations = 6;
+    const extraIterations = maxExtraTime > 0
+      ? Math.floor(Math.random() * (maxExtraTime*1000 / interval))
+      : 0;
+    const maxIterations = baseIterations + extraIterations;
+
+    const start = () => {
+      let i=0;
+      const step = () => {
+        if(token!==this._token) return;
+        if(i++ >= maxIterations){ this.lock(); return; }
+
+        if(this.hidden){
+          this.hidden=false;
+          this.span.style.opacity="1";
+        }
+
+        this.span.style.fontFamily = matrixMode ? matrixFont : rand(normalFonts);
+        this.span.style.fontSize = `calc(var(--size) * ${scrambleSize})`;
+        this.span.style.verticalAlign = superscript ? "super" : "baseline";
+        this.span.style.color = matrixMode
+          ? "var(--matrix-green)"
+          : randomColors ? randColor() : "";
+
+        const pool = matrixMode ? matrixPool : normalPool;
+        this.span.textContent =
+          this.target===" " ? NBSP : pool[Math.random()*pool.length|0];
+
+        setTimeout(()=>requestAnimationFrame(step), interval);
+      };
+      requestAnimationFrame(step);
+    };
+
+    if(this.delay>0) setTimeout(start, this.delay);
+    else start();
+  }
+
+  lock(){
+    this.span.style.fontFamily="";
+    this.span.style.fontSize="";
+    this.span.style.verticalAlign="";
+    this.span.style.color="";
+    this.span.style.opacity="1";
+    this.span.textContent=this.target===" "?NBSP:this.target;
+  }
+
+  remove(){
+    this._token=(this._token||0)+1;
+    this.span.remove();
+  }
+}
+
+/* SYNC */
+function syncToValue(val, delayMap=null, hideMap=null){
+  while(glyphs.length>val.length) glyphs.pop().remove();
+
+  for(let i=0;i<val.length;i++){
+    const ch=val[i];
+    const delay=delayMap?delayMap(i)||0:0;
+    const hide=hideMap?!!hideMap(i):false;
+
+    if(!glyphs[i]) glyphs[i]=new Glyph(ch,delay,hide);
+    else if(glyphs[i].target!==ch){
+      glyphs[i].remove();
+      glyphs[i]=new Glyph(ch,delay,hide);
+    }else if(delayMap||hideMap){
+      glyphs[i].delay=delay;
+      glyphs[i].hidden=hide;
+      glyphs[i].run();
+    }
+  }
+}
+
+/* INPUT */
+input.addEventListener("input",()=>syncToValue(input.value));
+
+input.addEventListener("paste",e=>{
+  if(!sequentialPaste) return;
+  e.preventDefault();
+
+  const text=e.clipboardData.getData("text");
+  const s=input.selectionStart, epos=input.selectionEnd;
+  const val=input.value.slice(0,s)+text+input.value.slice(epos);
+  input.value=val;
+  input.setSelectionRange(s+text.length,s+text.length);
+
+  const delayMap=i=>i>=s&&i<s+text.length?(i-s)*120:0;
+  const hideMap=i=>i>=s&&i<s+text.length;
+
+  syncToValue(val,delayMap,hideMap);
+});
+
+/* UI */
+document.getElementById("fontSelect").onchange=e=>document.documentElement.style.setProperty("--font",e.target.value);
+document.getElementById("size").oninput=e=>document.documentElement.style.setProperty("--size",e.target.value+"px");
+document.getElementById("speed").oninput=e=>{
+  speed=+e.target.value;
+  speedLabel.textContent=`${I18N[cur].speed}: ${speed}`;
+};
+document.getElementById("scrambleSize").oninput=e=>{
+  scrambleSize=+e.target.value;
+  scrambleSizeLabel.textContent=`${I18N[cur].scrambleSize}: ${scrambleSize.toFixed(2)}×`;
+};
+document.getElementById("randomTime").oninput=e=>{
+  maxExtraTime=+e.target.value;
+  randomTimeLabel.textContent=`${I18N[cur].randomTime}: ${maxExtraTime.toFixed(1)} s`;
+};
+document.getElementById("colorToggle").onchange=e=>randomColors=e.target.checked;
+document.getElementById("superscriptToggle").onchange=e=>superscript=e.target.checked;
+document.getElementById("sequentialToggle").onchange=e=>sequentialPaste=e.target.checked;
+document.getElementById("matrixToggle").onchange=e=>matrixMode=e.target.checked;
+document.getElementById("themeSlider").oninput=e=>document.documentElement.style.setProperty("--theme",e.target.value);
+
+/* RESET */
+document.getElementById("resetBtn").onclick=()=>{
+  input.value="";
+  glyphs.forEach(g=>g.remove());
+  glyphs=[];
+  output.innerHTML="";
+};
+
+/* LANGUAGE */
+let cur="de";
+const langSel=document.getElementById("languageSelect");
+langSel.onchange=()=>applyLang(langSel.value);
+
+function applyLang(l){
+  cur=l;
+  const t=I18N[l];
+  document.documentElement.lang=t.htmlLang;
+  document.title=t.title;
+  input.placeholder=t.placeholder;
+  document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=t[el.dataset.i18n]);
+  speedLabel.textContent=`${t.speed}: ${speed}`;
+  scrambleSizeLabel.textContent=`${t.scrambleSize}: ${scrambleSize.toFixed(2)}×`;
+  randomTimeLabel.textContent=`${t.randomTime}: ${maxExtraTime.toFixed(1)} s`;
+}
+applyLang("de");
+</script>
+</body>
+</html>
