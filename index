@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Realtime Glyph Scramble</title>
+<title>Word-Scrambler</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=IBM+Plex+Mono:wght@300;600&family=JetBrains+Mono:wght@300;600&family=Space+Grotesk:wght@300;600&display=swap" rel="stylesheet">
 
@@ -13,13 +13,19 @@
   --size: 16px;
   --theme: 0;
 
-  --bg: calc((1 - var(--theme)) * 0   + var(--theme) * 245);
-  --fg: calc((1 - var(--theme)) * 255 + var(--theme) * 20);
+  /* NEW: dropdown base colors */
+  --base-bg: #000000;
+  --base-fg: #f2f5f4;
 
-  --line: rgba(var(--fg), var(--fg), var(--fg), .18);
-  --muted: rgba(var(--fg), var(--fg), var(--fg), .72);
-  --field-border: rgba(var(--fg), var(--fg), var(--fg), .25);
-  --panel: rgba(var(--fg), var(--fg), var(--fg), .03);
+  /* NEW: theme-mixed live colors */
+  --bg-color: #000000;
+  --fg-color: #f2f5f4;
+
+  /* derived */
+  --line: rgba(242,245,244,.18);
+  --muted: rgba(242,245,244,.72);
+  --field-border: rgba(242,245,244,.25);
+  --panel: rgba(242,245,244,.03);
 
   --accent: #42e8ff;
   --matrix-green: #00ff6a;
@@ -30,8 +36,8 @@
 html, body{
   height:100%;
   margin:0;
-  background: rgb(var(--bg), var(--bg), var(--bg));
-  color: rgb(var(--fg), var(--fg), var(--fg));
+  background: var(--bg-color);
+  color: var(--fg-color);
   font-family: var(--font), system-ui, sans-serif;
 }
 
@@ -79,11 +85,11 @@ label{
   color:var(--muted);
 }
 
-select, input[type="range"], button.reset{
+select, input[type="range"], button.reset, button.export{
   width:100%;
   margin-top:6px;
-  background: rgb(var(--bg), var(--bg), var(--bg));
-  color: rgb(var(--fg), var(--fg), var(--fg));
+  background: rgba(0,0,0,.15);
+  color: var(--fg-color);
   border:1px solid var(--field-border);
   padding:8px;
   font-size:12px;
@@ -102,10 +108,20 @@ input[type="range"]{ accent-color: var(--accent); }
   color:var(--muted);
 }
 
-button.reset{
+button.reset, button.export{
   cursor:pointer;
 }
-button.reset:hover{ border-color: var(--accent); }
+button.reset:hover, button.export:hover{ border-color: var(--accent); }
+
+/* NEW: dropdowns side-by-side */
+.row{
+  display:flex;
+  gap:10px;
+}
+.row > .col{
+  flex:1;
+  min-width:0;
+}
 
 /* ===== RIGHT ===== */
 .right{
@@ -124,6 +140,7 @@ button.reset:hover{ border-color: var(--accent); }
   line-height:1.6;
   white-space:pre-wrap;
   border-bottom:1px solid var(--line);
+  color: var(--fg-color);
 }
 
 textarea{
@@ -133,8 +150,8 @@ textarea{
   border:none;
   outline:none;
   padding:14px;
-  background: rgb(var(--bg), var(--bg), var(--bg));
-  color: rgb(var(--fg), var(--fg), var(--fg));
+  background: rgba(0,0,0,.15);
+  color: var(--fg-color);
   font-family: var(--font), system-ui, sans-serif;
   font-size:14px;
   letter-spacing:.12em;
@@ -144,10 +161,58 @@ textarea{
   display:inline-block;
   will-change: contents, font-family, color, font-size, vertical-align, opacity;
 }
+
+/* ===== EXPORT OVERLAY (foreground window) ===== */
+#exportOverlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999999;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+}
+
+#exportModal{
+  min-width: 320px;
+  padding: 22px 20px;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(15,15,15,.92);
+  color: #f2f5f4;
+  font-family: Inter, system-ui, sans-serif;
+  letter-spacing:.12em;
+  text-transform: uppercase;
+}
+
+#exportPct{
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+
+#exportBar{
+  height: 10px;
+  background: rgba(255,255,255,.12);
+  border-radius: 999px;
+  overflow:hidden;
+}
+
+#exportBarInner{
+  height:100%;
+  width:0%;
+  background: #75c0c7;
+}
 </style>
 </head>
 
 <body>
+<div id="exportOverlay" aria-hidden="true">
+  <div id="exportModal" role="dialog" aria-modal="true">
+    <div id="exportPct">0%</div>
+    <div id="exportBar"><div id="exportBarInner"></div></div>
+  </div>
+</div>
+
 <div class="app">
 
 <div class="left">
@@ -177,6 +242,39 @@ textarea{
 
   <div class="settings">
 
+    <!-- NEW: COLORS -->
+    <div class="section">
+      <div class="section-title">Farben</div>
+
+      <div class="row">
+        <div class="col">
+          <label>Hintergrund</label>
+          <select id="bgSelect">
+            <option value="#000000">Schwarz</option>
+            <option value="#161618">Richtiges Grau #161618</option>
+            <option value="#212121">Alt. Hintergrund #212121</option>
+            <option value="#2a2e31">Alt. Hintergrund 2 #2a2e31</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Schrift</label>
+          <select id="fgSelect">
+            <option value="#888888">Schrift (ausgegraut) #888888</option>
+            <option value="#f2f5f4" selected>Schrift #f2f5f4</option>
+            <option value="#75c0c7">Link #75c0c7</option>
+            <option value="#008fff">Episches Blau #008fff</option>
+            <option value="#1db992">Angenehmes Grün #1db992</option>
+            <option value="#bfbc06">Olivgrün d. Friedens #bfbc06</option>
+            <option value="#f7c516">Ein Gelb #f7c516</option>
+            <option value="#fc8833">DOOFES PASSIERT #fc8833</option>
+            <option value="#ee4d2e">Orange #ee4d2e</option>
+            <option value="#d23c22">Logo-Orange #d23c22</option>
+            <option value="#ff0082">Altes pr0gramm #ff0082</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <div class="section">
       <div class="section-title" data-i18n="secText"></div>
 
@@ -196,7 +294,8 @@ textarea{
       <div class="section-title" data-i18n="secScramble"></div>
 
       <label id="speedLabel"></label>
-      <input id="speed" type="range" min="0.5" max="40" step="0.5" value="3">
+      <!-- FIX: default = 6 -->
+      <input id="speed" type="range" min="0.5" max="40" step="0.5" value="6">
 
       <label id="scrambleSizeLabel"></label>
       <input id="scrambleSize" type="range" min="0.6" max="1.8" step="0.05" value="1">
@@ -220,15 +319,25 @@ textarea{
       </div>
 
       <div class="checkbox">
-        <input id="matrixToggle" type="checkbox">
-        <span data-i18n="optMatrix"></span>
-      </div>
+  <input id="matrixToggle" type="checkbox">
+  <span data-i18n="optMatrix"></span>
+
+  <input id="matrixGreenToggle" type="checkbox" style="margin-left:12px">
+  <span>Grün</span>
+</div>
+
     </div>
 
     <div class="section">
       <div class="section-title" data-i18n="secTheme"></div>
       <label data-i18n="lblTheme"></label>
       <input id="themeSlider" type="range" min="0" max="1" step="0.01" value="0">
+    </div>
+
+    <!-- NEW: EXPORT -->
+    <div class="section">
+      <div class="section-title">Export</div>
+      <button id="exportBtn" class="export" type="button">Als WebM (VP8) exportieren</button>
     </div>
 
     <div class="section">
@@ -256,10 +365,9 @@ const I18N = {
     scrambleSize:"Scramble-Größenfaktor", randomTime:"Zusätzliche zufällige Scramble-Zeit",
     optColors:"Zufällige Scramble-Farben", optSup:"Scramble hochgestellt",
     optSeqPaste:"Sequenziell beim Einfügen", optMatrix:"Matrix-Modus",
-    secTheme:"Darstellung", lblTheme:"Dark ↔ Light",
+    secTheme:"Darstellung", lblTheme:"Dunkel ↔ Hell",
     secReset:"Aktionen", resetBtn:"Alles löschen"
   },
-
   en:{
     htmlLang:"en", title:"Realtime Glyph Scramble", placeholder:"TYPE TEXT…",
     lblLanguage:"Language", secText:"Text", lblFont:"Font", lblBaseSize:"Base Size",
@@ -270,7 +378,6 @@ const I18N = {
     secTheme:"Appearance", lblTheme:"Dark ↔ Light",
     secReset:"Actions", resetBtn:"Reset"
   },
-
   fr:{
     htmlLang:"fr", title:"Scramble de glyphes en temps réel", placeholder:"SAISIR DU TEXTE…",
     lblLanguage:"Langue", secText:"Texte", lblFont:"Police", lblBaseSize:"Taille de base",
@@ -281,7 +388,6 @@ const I18N = {
     secTheme:"Apparence", lblTheme:"Sombre ↔ Clair",
     secReset:"Actions", resetBtn:"Réinitialiser"
   },
-
   es:{
     htmlLang:"es", title:"Scramble de glifos en tiempo real", placeholder:"ESCRIBE TEXTO…",
     lblLanguage:"Idioma", secText:"Texto", lblFont:"Fuente", lblBaseSize:"Tamaño base",
@@ -292,7 +398,6 @@ const I18N = {
     secTheme:"Apariencia", lblTheme:"Oscuro ↔ Claro",
     secReset:"Acciones", resetBtn:"Restablecer"
   },
-
   it:{
     htmlLang:"it", title:"Scramble di glifi in tempo reale", placeholder:"INSERISCI TESTO…",
     lblLanguage:"Lingua", secText:"Testo", lblFont:"Carattere", lblBaseSize:"Dimensione base",
@@ -303,7 +408,6 @@ const I18N = {
     secTheme:"Aspetto", lblTheme:"Scuro ↔ Chiaro",
     secReset:"Azioni", resetBtn:"Reimposta"
   },
-
   nl:{
     htmlLang:"nl", title:"Realtime Glyph Scramble", placeholder:"TEKST INVOEREN…",
     lblLanguage:"Taal", secText:"Tekst", lblFont:"Lettertype", lblBaseSize:"Basisgrootte",
@@ -314,7 +418,6 @@ const I18N = {
     secTheme:"Weergave", lblTheme:"Donker ↔ Licht",
     secReset:"Acties", resetBtn:"Reset"
   },
-
   pl:{
     htmlLang:"pl", title:"Scramble glifów w czasie rzeczywistym", placeholder:"WPISZ TEKST…",
     lblLanguage:"Język", secText:"Tekst", lblFont:"Czcionka", lblBaseSize:"Rozmiar bazowy",
@@ -325,7 +428,6 @@ const I18N = {
     secTheme:"Wygląd", lblTheme:"Ciemny ↔ Jasny",
     secReset:"Akcje", resetBtn:"Wyczyść"
   },
-
   pt:{
     htmlLang:"pt", title:"Scramble de glifos em tempo real", placeholder:"DIGITE TEXTO…",
     lblLanguage:"Idioma", secText:"Texto", lblFont:"Fonte", lblBaseSize:"Tamanho base",
@@ -336,7 +438,6 @@ const I18N = {
     secTheme:"Aparência", lblTheme:"Escuro ↔ Claro",
     secReset:"Ações", resetBtn:"Redefinir"
   },
-
   sv:{
     htmlLang:"sv", title:"Realtids-glyph-scramble", placeholder:"SKRIV TEXT…",
     lblLanguage:"Språk", secText:"Text", lblFont:"Typsnitt", lblBaseSize:"Basstorlek",
@@ -347,7 +448,6 @@ const I18N = {
     secTheme:"Utseende", lblTheme:"Mörk ↔ Ljus",
     secReset:"Åtgärder", resetBtn:"Rensa"
   },
-
   fi:{
     htmlLang:"fi", title:"Reaaliaikainen glyyfi-sekoitus", placeholder:"KIRJOITA TEKSTI…",
     lblLanguage:"Kieli", secText:"Teksti", lblFont:"Fontti", lblBaseSize:"Peruskoko",
@@ -358,7 +458,6 @@ const I18N = {
     secTheme:"Ulkoasu", lblTheme:"Tumma ↔ Vaalea",
     secReset:"Toiminnot", resetBtn:"Tyhjennä"
   },
-
   cs:{
     htmlLang:"cs", title:"Scramble glyfů v reálném čase", placeholder:"ZADAT TEXT…",
     lblLanguage:"Jazyk", secText:"Text", lblFont:"Písmo", lblBaseSize:"Základní velikost",
@@ -369,7 +468,6 @@ const I18N = {
     secTheme:"Vzhled", lblTheme:"Tmavý ↔ Světlý",
     secReset:"Akce", resetBtn:"Vymazat"
   },
-
   ro:{
     htmlLang:"ro", title:"Scramble de glife în timp real", placeholder:"INTRODU TEXT…",
     lblLanguage:"Limbă", secText:"Text", lblFont:"Font", lblBaseSize:"Dimensiune de bază",
@@ -380,7 +478,6 @@ const I18N = {
     secTheme:"Aspect", lblTheme:"Întunecat ↔ Deschis",
     secReset:"Acțiuni", resetBtn:"Resetează"
   },
-
   bg:{
     htmlLang:"bg", title:"Скрамблиране на глифове в реално време", placeholder:"ВЪВЕДЕТЕ ТЕКСТ…",
     lblLanguage:"Език", secText:"Текст", lblFont:"Шрифт", lblBaseSize:"Базов размер",
@@ -391,7 +488,6 @@ const I18N = {
     secTheme:"Външен вид", lblTheme:"Тъмен ↔ Светъл",
     secReset:"Действия", resetBtn:"Изчисти"
   },
-
   ru:{
     htmlLang:"ru", title:"Скремблирование глифов в реальном времени", placeholder:"ВВЕДИТЕ ТЕКСТ…",
     lblLanguage:"Язык", secText:"Текст", lblFont:"Шрифт", lblBaseSize:"Базовый размер",
@@ -402,7 +498,6 @@ const I18N = {
     secTheme:"Внешний вид", lblTheme:"Тёмный ↔ Светлый",
     secReset:"Действия", resetBtn:"Очистить"
   },
-
   zh:{
     htmlLang:"zh", title:"实时字形扰乱", placeholder:"输入文本…",
     lblLanguage:"语言", secText:"文本", lblFont:"字体", lblBaseSize:"基础字号",
@@ -413,7 +508,6 @@ const I18N = {
     secTheme:"外观", lblTheme:"暗 ↔ 亮",
     secReset:"操作", resetBtn:"清空"
   },
-
   hi:{
     htmlLang:"hi", title:"रीयलटाइम ग्लिफ़ स्क्रैम्बल", placeholder:"पाठ दर्ज करें…",
     lblLanguage:"भाषा", secText:"पाठ", lblFont:"फ़ॉन्ट", lblBaseSize:"आधार आकार",
@@ -424,7 +518,6 @@ const I18N = {
     secTheme:"दिखावट", lblTheme:"डार्क ↔ लाइट",
     secReset:"क्रियाएँ", resetBtn:"सब साफ़ करें"
   },
-
   ja:{
     htmlLang:"ja", title:"リアルタイム・グリフスクランブル", placeholder:"テキストを入力…",
     lblLanguage:"言語", secText:"テキスト", lblFont:"フォント", lblBaseSize:"基本サイズ",
@@ -437,17 +530,19 @@ const I18N = {
   }
 };
 
-/* ================= SCRAMBLE ENGINE (unchanged) ================= */
+/* ================= SCRAMBLE ENGINE (ORIGINAL + FIXES) ================= */
 const output=document.getElementById("output");
 const input=document.getElementById("input");
 
 let glyphs=[];
-let speed=3, scrambleSize=1, randomColors=false, superscript=false,
-    sequentialPaste=false, matrixMode=false, maxExtraTime=0;
+let speed=6, scrambleSize=1, randomColors=false, superscript=false,
+    sequentialPaste=false, matrixMode=false, matrixGreen=false,
+    maxExtraTime=0;
+
 
 const NBSP="\u00A0";
-const normalPool="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}<>?/\\|~;:,.";
-const matrixPool="アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789";
+const normalPool="AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTuUvVwWxXyYzZ0123456789!@#$%^&*()-_=+[]{}<>?/\\|~;:,.";
+const matrixPool="アイウエオカキクケコサシスセソタチツテトナニヌネノAaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTuUvVwWxXyYzZ0123456789!@#$%^&*()-_=+[]{}<>?/\\|~;:,.";
 const normalFonts=["Inter","IBM Plex Mono","JetBrains Mono","Space Grotesk"];
 const matrixFont="IBM Plex Mono, monospace";
 
@@ -459,6 +554,7 @@ class Glyph{
     this.target=ch;
     this.delay=delay;
     this.hidden=hidden;
+    this.locked=false;     // NEW: export end/progress
     this.span=document.createElement("span");
     this.span.className="char";
     this.span.textContent=ch===" "?NBSP:ch;
@@ -467,13 +563,14 @@ class Glyph{
     this.run();
   }
   run(){
+    this.locked=false;
     this._token=(this._token||0)+1;
     const token=this._token;
 
-    const interval=1000/speed;
     const baseIterations=6;
+    const intervalForExtra = () => 1000 / Math.max(0.1, speed);
     const extraIterations=maxExtraTime>0
-      ? Math.floor(Math.random()*(maxExtraTime*1000/interval))
+      ? Math.floor(Math.random()*(maxExtraTime*1000/intervalForExtra()))
       : 0;
     const maxIterations=baseIterations+extraIterations;
 
@@ -491,14 +588,16 @@ class Glyph{
         this.span.style.fontFamily=matrixMode?matrixFont:rand(normalFonts);
         this.span.style.fontSize=`calc(var(--size)*${scrambleSize})`;
         this.span.style.verticalAlign=superscript?"super":"baseline";
-        this.span.style.color=matrixMode
-          ? "var(--matrix-green)"
-          : randomColors ? randColor() : "";
+this.span.style.color = matrixMode
+  ? (matrixGreen ? "var(--matrix-green)" : "var(--fg-color)")
+  : randomColors ? randColor() : "";
+
 
         const pool=matrixMode?matrixPool:normalPool;
         this.span.textContent=this.target===" "?NBSP:pool[Math.random()*pool.length|0];
 
-        setTimeout(()=>requestAnimationFrame(step),interval);
+        const liveInterval = 1000 / Math.max(0.1, speed);
+        setTimeout(()=>requestAnimationFrame(step), liveInterval);
       };
       requestAnimationFrame(step);
     };
@@ -513,6 +612,7 @@ class Glyph{
     this.span.style.color="";
     this.span.style.opacity="1";
     this.span.textContent=this.target===" "?NBSP:this.target;
+    this.locked=true;
   }
   remove(){
     this._token=(this._token||0)+1;
@@ -559,9 +659,74 @@ input.addEventListener("paste",e=>{
   syncToValue(val,delayMap,hideMap);
 });
 
-/* UI */
+/* ================= THEME + DERIVED COLORS ================= */
+function hexToRgbAny(v){
+  const s=(v||"").trim().toLowerCase();
+  if(s.startsWith("rgb")){
+    const m=s.match(/(\d+)\D+(\d+)\D+(\d+)/);
+    if(!m) return {r:255,g:255,b:255};
+    return {r:+m[1],g:+m[2],b:+m[3]};
+  }
+  let x=s.replace("#","");
+  if(x.length===3) x=x.split("").map(c=>c+c).join("");
+  const n=parseInt(x||"000000",16);
+  return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+}
+
+function rgbToCss({r,g,b}){ return `rgb(${r|0},${g|0},${b|0})`; }
+
+function mixRgb(a,b,t){
+  return {
+    r: a.r + (b.r-a.r)*t,
+    g: a.g + (b.g-a.g)*t,
+    b: a.b + (b.b-a.b)*t
+  };
+}
+
+function applyDerivedFromFg(fg){
+  const r=Math.max(0,Math.min(255,fg.r|0));
+  const g=Math.max(0,Math.min(255,fg.g|0));
+  const b=Math.max(0,Math.min(255,fg.b|0));
+  const root=document.documentElement.style;
+  root.setProperty("--line", `rgba(${r},${g},${b},.18)`);
+  root.setProperty("--muted", `rgba(${r},${g},${b},.72)`);
+  root.setProperty("--field-border", `rgba(${r},${g},${b},.25)`);
+  root.setProperty("--panel", `rgba(${r},${g},${b},.03)`);
+}
+
+function getCssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function applyThemeMix(){
+  const t = +document.getElementById("themeSlider").value;
+
+  const baseBg = hexToRgbAny(getCssVar("--base-bg"));
+  const baseFgRaw = getCssVar("--base-fg").toLowerCase();
+
+  const bg = mixRgb(baseBg, {r:255,g:255,b:255}, t);
+
+  let fg;
+  if(baseFgRaw === "#f2f5f4" || baseFgRaw === "#ffffff" || baseFgRaw === "rgb(242, 245, 244)" || baseFgRaw === "rgb(255, 255, 255)"){
+    fg = mixRgb({r:255,g:255,b:255}, {r:0,g:0,b:0}, t);
+  }else{
+    fg = hexToRgbAny(baseFgRaw);
+  }
+
+  const root=document.documentElement.style;
+  root.setProperty("--bg-color", rgbToCss(bg));
+  root.setProperty("--fg-color", rgbToCss(fg));
+  applyDerivedFromFg(fg);
+}
+
+/* ================= UI ================= */
 document.getElementById("fontSelect").onchange=e=>document.documentElement.style.setProperty("--font",e.target.value);
 document.getElementById("size").oninput=e=>document.documentElement.style.setProperty("--size",e.target.value+"px");
+
+const speedLabel=document.getElementById("speedLabel");
+const scrambleSizeLabel=document.getElementById("scrambleSizeLabel");
+const randomTimeLabel=document.getElementById("randomTimeLabel");
+
 document.getElementById("speed").oninput=e=>{
   speed=+e.target.value;
   speedLabel.textContent=`${I18N[cur].speed}: ${speed}`;
@@ -578,7 +743,23 @@ document.getElementById("colorToggle").onchange=e=>randomColors=e.target.checked
 document.getElementById("superscriptToggle").onchange=e=>superscript=e.target.checked;
 document.getElementById("sequentialToggle").onchange=e=>sequentialPaste=e.target.checked;
 document.getElementById("matrixToggle").onchange=e=>matrixMode=e.target.checked;
-document.getElementById("themeSlider").oninput=e=>document.documentElement.style.setProperty("--theme",e.target.value);
+document.getElementById("matrixGreenToggle").onchange =
+  e => matrixGreen = e.target.checked;
+
+
+document.getElementById("themeSlider").oninput=applyThemeMix;
+
+const bgSelect=document.getElementById("bgSelect");
+const fgSelect=document.getElementById("fgSelect");
+
+bgSelect.onchange=e=>{
+  document.documentElement.style.setProperty("--base-bg", e.target.value);
+  applyThemeMix();
+};
+fgSelect.onchange=e=>{
+  document.documentElement.style.setProperty("--base-fg", e.target.value);
+  applyThemeMix();
+};
 
 /* RESET */
 document.getElementById("resetBtn").onclick=()=>{
@@ -595,18 +776,433 @@ langSel.onchange=()=>applyLang(langSel.value);
 
 function applyLang(l){
   cur=l;
-  const t=I18N[l];
-  document.documentElement.lang=t.htmlLang;
-  document.title=t.title;
-  input.placeholder=t.placeholder;
+  const t=I18N[l]||I18N.de;
+  document.documentElement.lang=t.htmlLang||"de";
+  document.title=t.title||"Realtime Glyph Scramble";
+  input.placeholder=t.placeholder||"TEXT EINGEBEN…";
   document.querySelectorAll("[data-i18n]").forEach(el=>{
-    el.textContent=t[el.dataset.i18n];
+    el.textContent=t[el.dataset.i18n] ?? "";
   });
   speedLabel.textContent=`${t.speed}: ${speed}`;
   scrambleSizeLabel.textContent=`${t.scrambleSize}: ${scrambleSize.toFixed(2)}×`;
   randomTimeLabel.textContent=`${t.randomTime}: ${maxExtraTime.toFixed(1)} s`;
 }
 applyLang("de");
+applyThemeMix();
+
+/* ================= EXPORT (VP8, no audio, FIREFOX-STABLE, +1s max, word wrap, speed-linked) ================= */
+const exportBtn=document.getElementById("exportBtn");
+const exportOverlay=document.getElementById("exportOverlay");
+const exportPct=document.getElementById("exportPct");
+const exportBarInner=document.getElementById("exportBarInner");
+
+function showExportOverlay(){
+  exportPct.textContent="0%";
+  exportBarInner.style.width="0%";
+  exportOverlay.style.display="flex";
+  exportOverlay.setAttribute("aria-hidden","false");
+}
+function hideExportOverlay(){
+  exportOverlay.style.display="none";
+  exportOverlay.setAttribute("aria-hidden","true");
+}
+
+function parsePx(v){
+  const n=parseFloat(String(v||"").replace("px",""));
+  return Number.isFinite(n)?n:0;
+}
+
+function getExportStyleSnapshot(){
+  const root = getComputedStyle(document.documentElement);
+  const out  = getComputedStyle(output);
+
+  const width = 720; // ChatGPT-like
+
+  const paddingTop    = parsePx(out.paddingTop);
+  const paddingRight  = parsePx(out.paddingRight);
+  const paddingBottom = parsePx(out.paddingBottom);
+  const paddingLeft   = parsePx(out.paddingLeft);
+
+  const fontSizeBase = parsePx(root.getPropertyValue("--size").trim() || out.fontSize);
+  const fontFamilyUI = root.getPropertyValue("--font").trim() || out.fontFamily;
+
+  let lineHeightPx = parsePx(out.lineHeight);
+  if(!lineHeightPx){
+    const lh = out.lineHeight;
+    if(String(lh).includes(".")) lineHeightPx = fontSizeBase * parseFloat(lh);
+    else lineHeightPx = fontSizeBase * 1.6;
+  }
+
+  const letterSpacingPx = parsePx(out.letterSpacing);
+
+  const bg = root.getPropertyValue("--bg-color").trim() || out.backgroundColor || "#000";
+  const fg = root.getPropertyValue("--fg-color").trim() || out.color || "#f2f5f4";
+  const matrixGreen = root.getPropertyValue("--matrix-green").trim() || "#00ff6a";
+
+  return {
+    width,
+    paddingTop, paddingRight, paddingBottom, paddingLeft,
+    fontSizeBase,
+    lineHeightPx,
+    letterSpacingPx,
+    fontFamilyUI,
+    bg, fg, matrixGreen
+  };
+}
+
+function makeCanvasFont(fontFamily, sizePx, weight=300){
+  return `${weight} ${sizePx}px ${fontFamily}, system-ui, sans-serif`;
+}
+
+function measureTokenWidth(ctx, token, letterSpacingPx){
+  // token can include spaces; preserve them; treat regular space as NBSP for measurement consistency
+  let w=0;
+  for(let i=0;i<token.length;i++){
+    const ch = token[i]===" " ? NBSP : token[i];
+    w += (ctx.measureText(ch).width || 0);
+    if(i < token.length-1) w += letterSpacingPx;
+  }
+  return w;
+}
+
+function tokenizePreserve(text){
+  // tokens: "\n" as own token, runs of spaces as token, runs of non-space non-newline as token
+  const tokens=[];
+  let mode=null; // "word" | "space"
+  let buf="";
+
+  const flush=()=>{
+    if(buf){ tokens.push(buf); buf=""; }
+  };
+
+  for(const ch of text){
+    if(ch === "\n"){
+      flush();
+      tokens.push("\n");
+      mode=null;
+      continue;
+    }
+    if(ch === " "){
+      if(mode !== "space"){ flush(); mode="space"; }
+      buf += " ";
+      continue;
+    }
+    // normal char
+    if(mode !== "word"){ flush(); mode="word"; }
+    buf += ch;
+  }
+  flush();
+  return tokens;
+}
+
+function layoutTokensToCharPositions(ctx, text, maxWidth, letterSpacingPx, paddingLeft, paddingTop, lineHeightPx){
+  const tokens = tokenizePreserve(text);
+  const positions = []; // per char: {ch, x, y, indexInText}
+  let x = paddingLeft;
+  let y = paddingTop;
+
+  const newLine = ()=>{
+    x = paddingLeft;
+    y += lineHeightPx;
+  };
+
+  let globalIndex = 0;
+
+  for(const tok of tokens){
+    if(tok === "\n"){
+      // newline consumes one char in global index, but we don't draw it
+      globalIndex += 1;
+      newLine();
+      continue;
+    }
+
+    const tokWidth = measureTokenWidth(ctx, tok, letterSpacingPx);
+
+    if(x > paddingLeft && (x + tokWidth) > (paddingLeft + maxWidth)){
+      // If token is spaces only: put them on next line too (like pre-wrap)
+      // If token is a long word that doesn't fit even on empty line -> fallback to char wrap.
+      const isSpaces = /^ +$/.test(tok);
+      if(!isSpaces){
+        // if it would fit on empty line, just wrap before it
+        if(tokWidth <= maxWidth){
+          newLine();
+        }else{
+          // hard case: single word longer than line => char wrap
+          for(let i=0;i<tok.length;i++){
+            const ch = tok[i];
+            const adv = (ctx.measureText(ch===" " ? NBSP : ch).width || 0) + (i < tok.length-1 ? letterSpacingPx : 0);
+
+            // if char doesn't fit, newline
+            if(x > paddingLeft && (x + adv) > (paddingLeft + maxWidth)){
+              newLine();
+            }
+            positions.push({ ch, x, y, indexInText: globalIndex });
+            x += adv;
+            globalIndex += 1;
+          }
+          continue;
+        }
+      }else{
+        // spaces: wrap
+        newLine();
+      }
+    }
+
+    // place token normally
+    for(let i=0;i<tok.length;i++){
+      const ch = tok[i];
+      const adv = (ctx.measureText(ch===" " ? NBSP : ch).width || 0) + (i < tok.length-1 ? letterSpacingPx : 0);
+
+      // Just in case (tiny maxWidth): char wrap
+      if(x > paddingLeft && (x + adv) > (paddingLeft + maxWidth)){
+        newLine();
+      }
+
+      positions.push({ ch, x, y, indexInText: globalIndex });
+      x += adv;
+      globalIndex += 1;
+    }
+  }
+
+  const usedLines = Math.max(1, Math.round(((y - paddingTop) / lineHeightPx) + 1));
+  return { positions, usedLines };
+}
+function computeDynamicCanvasWidth(positions, ctx, letterSpacingPx, paddingRight){
+  let maxX = 0;
+
+  for(const p of positions){
+    const ch = p.ch === " " ? NBSP : p.ch;
+    const w = (ctx.measureText(ch).width || 0) + letterSpacingPx;
+    maxX = Math.max(maxX, p.x + w);
+  }
+
+  return Math.ceil(maxX + paddingRight);
+}
+
+exportBtn.onclick = async ()=>{
+  if(!window.MediaRecorder){
+    alert("MediaRecorder wird in deinem Browser nicht unterstützt.");
+    return;
+  }
+
+  const VP8_MIME = "video/webm; codecs=vp8";
+  if(!MediaRecorder.isTypeSupported(VP8_MIME)){
+    alert("VP8 WebM wird in deinem Browser nicht unterstützt.");
+    return;
+  }
+
+  const FPS = 30;
+  const HARD_CAP_MS = 16000; // +1s vs vorher (15000)
+  const DONE_EXTRA_MS = 1000; // noch 1s "auslaufen", damit wirklich alles sichtbar scrambled ist
+
+  showExportOverlay();
+  exportBtn.disabled=true;
+
+  const S = getExportStyleSnapshot();
+  const text = input.value || "";
+
+const canvas = document.createElement("canvas");
+
+// temporär groß, um korrekt zu layouten
+const TEMP_WIDTH = 4096;
+canvas.width = TEMP_WIDTH;
+
+const ctx = canvas.getContext("2d", {alpha:false});
+ctx.textBaseline = "top";
+
+  // base layout font
+  ctx.font = makeCanvasFont(S.fontFamilyUI, S.fontSizeBase, 300);
+  const maxTextWidth = S.width - S.paddingLeft - S.paddingRight;
+
+  const { positions, usedLines } = layoutTokensToCharPositions(
+    ctx, text, maxTextWidth, S.letterSpacingPx, S.paddingLeft, S.paddingTop, S.lineHeightPx
+  );
+const dynamicWidth = computeDynamicCanvasWidth(
+  positions,
+  ctx,
+  S.letterSpacingPx,
+  S.paddingRight
+);
+
+// optional absichern
+canvas.width = Math.min(
+  Math.max(dynamicWidth, 200),  // min width
+  1920                         // max width (oder Infinity)
+);
+
+  const height = Math.max(
+    60,
+    Math.ceil(S.paddingTop + usedLines * S.lineHeightPx + S.paddingBottom)
+  );
+  canvas.height = height;
+
+  // Build per-char state aligned to positions (positions excludes '\n' chars)
+  // Each char starts hidden until its startAtMs => NO cleartext frame
+  const delayMsPerChar = 20; // sequential reveal
+  const baseIterations = 6;
+  const intervalForExtra = () => 1000 / Math.max(0.1, speed);
+
+  // For speed-linking: each char advances scramble steps on schedule based on speed (like UI setTimeout)
+  const chars = positions.map((p, idx)=>{
+    const extraIterations = maxExtraTime>0
+      ? Math.floor(Math.random()*(maxExtraTime*1000/intervalForExtra()))
+      : 0;
+    return {
+      ch: p.ch,
+      x: p.x,
+      y: p.y,
+      startAtMs: idx * delayMsPerChar,
+      iter: 0,
+      maxIter: baseIterations + extraIterations,
+      locked: false,
+      lastStepMs: null, // for speed-linked stepping
+      lastDraw: null    // keep last scrambled glyph between steps
+    };
+  });
+
+  const stream = canvas.captureStream(FPS);
+  const rec = new MediaRecorder(stream, {
+    mimeType: VP8_MIME,
+    videoBitsPerSecond: 6_000_000
+  });
+
+  const chunks=[];
+  rec.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
+  rec.start();
+
+  // Firefox warmup
+  await new Promise(r=>setTimeout(r, 300));
+
+  const startedAt = performance.now();
+  let doneAt = null;
+
+  function lockedProgress(){
+    const total = chars.length || 1;
+    let locked = 0;
+    for(const c of chars) if(c.locked) locked++;
+    return locked / total;
+  }
+  function allLocked(){
+    for(const c of chars) if(!c.locked) return false;
+    return true;
+  }
+
+  try{
+    while(true){
+      const now = performance.now();
+      const t = now - startedAt;
+
+      // background
+      ctx.fillStyle = S.bg;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      // draw each char
+      for(const st of chars){
+        // before start: draw nothing
+        if(t < st.startAtMs) continue;
+
+        // determine if we need to advance scramble steps based on speed (UI-like)
+        const liveInterval = 1000 / Math.max(0.1, speed);
+
+        if(!st.locked){
+          if(st.lastStepMs == null){
+            st.lastStepMs = t;
+            // first visible draw should be scrambled (not cleartext)
+            const pool = matrixMode ? matrixPool : normalPool;
+            st.lastDraw = (st.ch===" " ? NBSP : pool[Math.random()*pool.length|0]);
+          }else{
+            // advance steps as many as required (in case FPS < speed)
+            while((t - st.lastStepMs) >= liveInterval && !st.locked){
+              st.lastStepMs += liveInterval;
+              st.iter++;
+              if(st.iter >= st.maxIter){
+                st.locked = true;
+                break;
+              }else{
+                const pool = matrixMode ? matrixPool : normalPool;
+                st.lastDraw = (st.ch===" " ? NBSP : pool[Math.random()*pool.length|0]);
+              }
+            }
+          }
+        }
+
+        // choose draw char + styles
+        let drawChar, useColor, useFamily, useSize, yOffset;
+        if(st.locked){
+          drawChar = (st.ch===" " ? NBSP : st.ch);
+          useColor = S.fg;
+          useFamily = S.fontFamilyUI;
+          useSize = S.fontSizeBase;
+          yOffset = 0;
+        }else{
+          drawChar = st.lastDraw ?? (st.ch===" " ? NBSP : st.ch);
+if(matrixMode){
+  useColor = matrixGreen ? S.matrixGreen : S.fg;
+}else if(randomColors){
+  useColor = randColor();
+}else{
+  useColor = S.fg;
+}
+
+
+          useFamily = matrixMode ? matrixFont : rand(normalFonts);
+          useSize = S.fontSizeBase * scrambleSize;
+
+          yOffset = 0;
+          if(superscript){
+            useSize = useSize * 0.85;
+            yOffset = -useSize * 0.28;
+          }
+        }
+
+        ctx.fillStyle = useColor;
+        ctx.font = makeCanvasFont(useFamily, useSize, 300);
+        ctx.fillText(drawChar, st.x, st.y + yOffset);
+      }
+
+      const p = Math.round(lockedProgress()*100);
+      exportPct.textContent = p + "%";
+      exportBarInner.style.width = p + "%";
+
+      const done = allLocked();
+      const tooLong = (t >= HARD_CAP_MS);
+
+      if(done && doneAt === null) doneAt = now;
+
+      // Stop conditions:
+      // - hard cap (now +1s vs previous)
+      // - OR all locked + extra 1s
+      const doneAndExtra = doneAt && (now - doneAt) >= DONE_EXTRA_MS;
+      if(tooLong || doneAndExtra) break;
+
+      await new Promise(r=>setTimeout(r, 1000/FPS));
+    }
+  } catch(err){
+    console.error(err);
+  }
+
+  // Firefox flush
+  await new Promise(r=>setTimeout(r, 300));
+  try{ rec.requestData(); } catch(_){}
+  await new Promise(r=>setTimeout(r, 50));
+
+  await new Promise(resolve=>{
+    rec.onstop = resolve;
+    rec.stop();
+  });
+
+  exportBtn.disabled=false;
+  hideExportOverlay();
+
+  const outBlob = new Blob(chunks, {type:VP8_MIME});
+  const a=document.createElement("a");
+  a.href = URL.createObjectURL(outBlob);
+  a.download = "scramble_vp8.webm";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 30000);
+};
 </script>
 
 </body>
