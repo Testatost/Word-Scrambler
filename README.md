@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -5,6 +6,8 @@
 <title>Word-Scrambler</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=IBM+Plex+Mono:wght@300;600&family=JetBrains+Mono:wght@300;600&family=Space+Grotesk:wght@300;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gifshot@0.3.2/gifshot.min.js"></script>
+
 
 <style>
 :root{
@@ -334,10 +337,16 @@ textarea{
     </div>
 
     <!-- NEW: EXPORT -->
-    <div class="section">
-      <div class="section-title">Export</div>
-      <button id="exportBtn" class="export" type="button">Als WebM (VP8) exportieren</button>
-    </div>
+<div class="section">
+<div class="section-title">Export</div>
+
+<div class="row">
+  <button id="exportVp8" class="export" type="button">WebM (VP8)</button>
+  <button id="exportVp9" class="export" type="button">WebM (VP9)</button>
+  <button id="exportGif" class="export" type="button">GIF</button>
+</div>
+</div>
+
 
     <div class="section">
       <div class="section-title" data-i18n="secReset"></div>
@@ -790,7 +799,6 @@ applyLang("de");
 applyThemeMix();
 
 /* ================= EXPORT (VP8, no audio, FIREFOX-STABLE, +1s max, word wrap, speed-linked) ================= */
-const exportBtn=document.getElementById("exportBtn");
 const exportOverlay=document.getElementById("exportOverlay");
 const exportPct=document.getElementById("exportPct");
 const exportBarInner=document.getElementById("exportBarInner");
@@ -978,24 +986,33 @@ function computeDynamicCanvasWidth(positions, ctx, letterSpacingPx, paddingRight
   return Math.ceil(maxX + paddingRight);
 }
 
-exportBtn.onclick = async ()=>{
+async function exportWebM(codec){
   if(!window.MediaRecorder){
     alert("MediaRecorder wird in deinem Browser nicht unterstützt.");
     return;
   }
 
-  const VP8_MIME = "video/webm; codecs=vp8";
-  if(!MediaRecorder.isTypeSupported(VP8_MIME)){
-    alert("VP8 WebM wird in deinem Browser nicht unterstützt.");
-    return;
-  }
+
+const mimeMap = {
+  vp8: "video/webm; codecs=vp8",
+  vp9: "video/webm; codecs=vp9"
+};
+
+const mimeType = mimeMap[codec];
+
+
+if(!MediaRecorder.isTypeSupported(mimeType)){
+  alert(`Format ${codec.toUpperCase()} wird nicht unterstützt.`);
+  hideExportOverlay();
+  return;
+}
 
   const FPS = 30;
   const HARD_CAP_MS = 16000; // +1s vs vorher (15000)
   const DONE_EXTRA_MS = 1000; // noch 1s "auslaufen", damit wirklich alles sichtbar scrambled ist
 
   showExportOverlay();
-  exportBtn.disabled=true;
+
 
   const S = getExportStyleSnapshot();
   const text = input.value || "";
@@ -1060,10 +1077,11 @@ canvas.width = Math.min(
   });
 
   const stream = canvas.captureStream(FPS);
-  const rec = new MediaRecorder(stream, {
-    mimeType: VP8_MIME,
-    videoBitsPerSecond: 6_000_000
-  });
+const rec = new MediaRecorder(stream, {
+  mimeType,
+  videoBitsPerSecond: 6_000_000
+});
+
 
   const chunks=[];
   rec.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
@@ -1185,23 +1203,102 @@ if(matrixMode){
   try{ rec.requestData(); } catch(_){}
   await new Promise(r=>setTimeout(r, 50));
 
-  await new Promise(resolve=>{
-    rec.onstop = resolve;
-    rec.stop();
-  });
+await new Promise(resolve => {
+  rec.onstop = resolve;
+  rec.stop();
+});
 
-  exportBtn.disabled=false;
+
+
+
   hideExportOverlay();
 
-  const outBlob = new Blob(chunks, {type:VP8_MIME});
+const outBlob = new Blob(chunks, { type: mimeType });
+
   const a=document.createElement("a");
   a.href = URL.createObjectURL(outBlob);
-  a.download = "scramble_vp8.webm";
+a.download = `scramble_${codec}.webm`;
+
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 30000);
-};
+}
+async function exportGif(){
+  showExportOverlay();
+
+  const FPS = 15;
+  const durationMs = 5000;
+  const frameCount = Math.floor((durationMs / 1000) * FPS);
+
+  const S = getExportStyleSnapshot();
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 720;
+  canvas.height = 400;
+  const ctx = canvas.getContext("2d");
+  ctx.textBaseline = "top";
+
+  const frames = [];
+
+  for(let i = 0; i < frameCount; i++){
+    ctx.fillStyle = S.bg;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle = S.fg;
+    ctx.font = `${S.fontSizeBase}px ${S.fontFamilyUI}`;
+    ctx.fillText(input.value || "", S.paddingLeft, S.paddingTop);
+
+    frames.push(canvas.toDataURL("image/png"));
+
+    const p = Math.round((i / frameCount) * 90); // 🔹 nur bis 90 %
+    exportPct.textContent = p + "%";
+    exportBarInner.style.width = p + "%";
+
+    // ✅ WICHTIG: Firefox Event-Loop freigeben
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  exportPct.textContent = "95%";
+  exportBarInner.style.width = "95%";
+
+  gifshot.createGIF({
+    images: frames,
+    gifWidth: canvas.width,
+    gifHeight: canvas.height,
+    interval: 1 / FPS,
+    numWorkers: 0
+  }, function(result){
+    if(result.error){
+      hideExportOverlay();
+      alert("GIF Export fehlgeschlagen");
+      return;
+    }
+
+    exportPct.textContent = "100%";
+    exportBarInner.style.width = "100%";
+
+    const a = document.createElement("a");
+    a.href = result.image;
+    a.download = "scramble.gif";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(hideExportOverlay, 200);
+  });
+}
+
+
+document.getElementById("exportVp8").onclick = () =>
+  exportWebM("vp8");
+
+document.getElementById("exportVp9").onclick = () =>
+  exportWebM("vp9");
+
+document.getElementById("exportGif").onclick = () => exportGif();
+
+
 </script>
 
 </body>
