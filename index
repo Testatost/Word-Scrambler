@@ -11,7 +11,6 @@
 :root{
   --font: Inter;
   --size: 16px;
-
   --theme: 0;
 
   --bg: calc((1 - var(--theme)) * 0   + var(--theme) * 245);
@@ -153,7 +152,6 @@ textarea{
 
 <div class="left">
 
-  <!-- LANGUAGE -->
   <div class="topbar">
     <label data-i18n="lblLanguage"></label>
     <select id="languageSelect">
@@ -179,7 +177,6 @@ textarea{
 
   <div class="settings">
 
-    <!-- TEXT -->
     <div class="section">
       <div class="section-title" data-i18n="secText"></div>
 
@@ -195,7 +192,6 @@ textarea{
       <input id="size" type="range" min="12" max="42" step="1" value="16">
     </div>
 
-    <!-- SCRAMBLE -->
     <div class="section">
       <div class="section-title" data-i18n="secScramble"></div>
 
@@ -229,14 +225,12 @@ textarea{
       </div>
     </div>
 
-    <!-- THEME -->
     <div class="section">
       <div class="section-title" data-i18n="secTheme"></div>
       <label data-i18n="lblTheme"></label>
       <input id="themeSlider" type="range" min="0" max="1" step="0.01" value="0">
     </div>
 
-    <!-- RESET -->
     <div class="section">
       <div class="section-title" data-i18n="secReset"></div>
       <button id="resetBtn" class="reset" data-i18n="resetBtn"></button>
@@ -245,7 +239,6 @@ textarea{
   </div>
 </div>
 
-<!-- RIGHT -->
 <div class="right">
   <div class="output" id="output"></div>
   <textarea id="input"></textarea>
@@ -254,78 +247,199 @@ textarea{
 </div>
 
 <script>
-/* ================= I18N ================= */
+/* ================= FULL I18N ================= */
 const I18N = {
   de:{
     htmlLang:"de", title:"Realtime Glyph Scramble", placeholder:"TEXT EINGEBEN…",
     lblLanguage:"Sprache", secText:"Text", lblFont:"Schriftart", lblBaseSize:"Grundgröße",
     secScramble:"Scramble", speed:"Geschwindigkeit (Iterationen / Sekunde)",
-    scrambleSize:"Scramble-Größenfaktor",
-    randomTime:"Zusätzliche zufällige Scramble-Zeit",
-    optColors:"Zufällige Scramble-Farben",
-    optSup:"Scramble hochgestellt",
-    optSeqPaste:"Sequenziell beim Einfügen",
-    optMatrix:"Matrix-Modus",
+    scrambleSize:"Scramble-Größenfaktor", randomTime:"Zusätzliche zufällige Scramble-Zeit",
+    optColors:"Zufällige Scramble-Farben", optSup:"Scramble hochgestellt",
+    optSeqPaste:"Sequenziell beim Einfügen", optMatrix:"Matrix-Modus",
     secTheme:"Darstellung", lblTheme:"Dark ↔ Light",
     secReset:"Aktionen", resetBtn:"Alles löschen"
   },
+
   en:{
     htmlLang:"en", title:"Realtime Glyph Scramble", placeholder:"TYPE TEXT…",
     lblLanguage:"Language", secText:"Text", lblFont:"Font", lblBaseSize:"Base Size",
     secScramble:"Scramble", speed:"Speed (Iterations / Second)",
-    scrambleSize:"Scramble Size Multiplier",
-    randomTime:"Additional Random Scramble Time",
-    optColors:"Random Scramble Colors",
-    optSup:"Superscript Scramble",
-    optSeqPaste:"Sequential on Paste",
-    optMatrix:"Matrix Mode",
+    scrambleSize:"Scramble Size Multiplier", randomTime:"Additional Random Scramble Time",
+    optColors:"Random Scramble Colors", optSup:"Superscript Scramble",
+    optSeqPaste:"Sequential on Paste", optMatrix:"Matrix Mode",
     secTheme:"Appearance", lblTheme:"Dark ↔ Light",
     secReset:"Actions", resetBtn:"Reset"
   },
+
   fr:{
     htmlLang:"fr", title:"Scramble de glyphes en temps réel", placeholder:"SAISIR DU TEXTE…",
     lblLanguage:"Langue", secText:"Texte", lblFont:"Police", lblBaseSize:"Taille de base",
     secScramble:"Scramble", speed:"Vitesse (itérations / seconde)",
-    scrambleSize:"Taille Scramble",
-    randomTime:"Durée de scramble aléatoire",
-    optColors:"Couleurs aléatoires",
-    optSup:"Exposant",
-    optSeqPaste:"Séquentiel au collage",
-    optMatrix:"Mode Matrix",
+    scrambleSize:"Facteur de taille du scramble", randomTime:"Durée aléatoire du scramble",
+    optColors:"Couleurs aléatoires", optSup:"Exposant",
+    optSeqPaste:"Séquentiel au collage", optMatrix:"Mode Matrix",
     secTheme:"Apparence", lblTheme:"Sombre ↔ Clair",
     secReset:"Actions", resetBtn:"Réinitialiser"
   },
+
   es:{
     htmlLang:"es", title:"Scramble de glifos en tiempo real", placeholder:"ESCRIBE TEXTO…",
     lblLanguage:"Idioma", secText:"Texto", lblFont:"Fuente", lblBaseSize:"Tamaño base",
     secScramble:"Scramble", speed:"Velocidad (iteraciones / segundo)",
-    scrambleSize:"Tamaño Scramble",
-    randomTime:"Tiempo adicional de scramble",
-    optColors:"Colores aleatorios",
-    optSup:"Superíndice",
-    optSeqPaste:"Secuencial al pegar",
-    optMatrix:"Modo Matrix",
+    scrambleSize:"Multiplicador de tamaño del scramble", randomTime:"Tiempo aleatorio adicional",
+    optColors:"Colores aleatorios", optSup:"Superíndice",
+    optSeqPaste:"Secuencial al pegar", optMatrix:"Modo Matrix",
     secTheme:"Apariencia", lblTheme:"Oscuro ↔ Claro",
     secReset:"Acciones", resetBtn:"Restablecer"
   },
+
+  it:{
+    htmlLang:"it", title:"Scramble di glifi in tempo reale", placeholder:"INSERISCI TESTO…",
+    lblLanguage:"Lingua", secText:"Testo", lblFont:"Carattere", lblBaseSize:"Dimensione base",
+    secScramble:"Scramble", speed:"Velocità (iterazioni / secondo)",
+    scrambleSize:"Moltiplicatore dimensione scramble", randomTime:"Durata casuale aggiuntiva",
+    optColors:"Colori casuali", optSup:"Apice",
+    optSeqPaste:"Sequenziale all'incolla", optMatrix:"Modalità Matrix",
+    secTheme:"Aspetto", lblTheme:"Scuro ↔ Chiaro",
+    secReset:"Azioni", resetBtn:"Reimposta"
+  },
+
+  nl:{
+    htmlLang:"nl", title:"Realtime Glyph Scramble", placeholder:"TEKST INVOEREN…",
+    lblLanguage:"Taal", secText:"Tekst", lblFont:"Lettertype", lblBaseSize:"Basisgrootte",
+    secScramble:"Scramble", speed:"Snelheid (iteraties / seconde)",
+    scrambleSize:"Scramble-groottefactor", randomTime:"Extra willekeurige tijd",
+    optColors:"Willekeurige kleuren", optSup:"Superscript",
+    optSeqPaste:"Sequentieel bij plakken", optMatrix:"Matrix-modus",
+    secTheme:"Weergave", lblTheme:"Donker ↔ Licht",
+    secReset:"Acties", resetBtn:"Reset"
+  },
+
+  pl:{
+    htmlLang:"pl", title:"Scramble glifów w czasie rzeczywistym", placeholder:"WPISZ TEKST…",
+    lblLanguage:"Język", secText:"Tekst", lblFont:"Czcionka", lblBaseSize:"Rozmiar bazowy",
+    secScramble:"Scramble", speed:"Prędkość (iteracje / sekundę)",
+    scrambleSize:"Mnożnik rozmiaru scramble", randomTime:"Dodatkowy losowy czas",
+    optColors:"Losowe kolory", optSup:"Indeks górny",
+    optSeqPaste:"Sekwencyjnie przy wklejaniu", optMatrix:"Tryb Matrix",
+    secTheme:"Wygląd", lblTheme:"Ciemny ↔ Jasny",
+    secReset:"Akcje", resetBtn:"Wyczyść"
+  },
+
+  pt:{
+    htmlLang:"pt", title:"Scramble de glifos em tempo real", placeholder:"DIGITE TEXTO…",
+    lblLanguage:"Idioma", secText:"Texto", lblFont:"Fonte", lblBaseSize:"Tamanho base",
+    secScramble:"Scramble", speed:"Velocidade (iterações / segundo)",
+    scrambleSize:"Multiplicador de tamanho", randomTime:"Tempo aleatório adicional",
+    optColors:"Cores aleatórias", optSup:"Sobrescrito",
+    optSeqPaste:"Sequencial ao colar", optMatrix:"Modo Matrix",
+    secTheme:"Aparência", lblTheme:"Escuro ↔ Claro",
+    secReset:"Ações", resetBtn:"Redefinir"
+  },
+
+  sv:{
+    htmlLang:"sv", title:"Realtids-glyph-scramble", placeholder:"SKRIV TEXT…",
+    lblLanguage:"Språk", secText:"Text", lblFont:"Typsnitt", lblBaseSize:"Basstorlek",
+    secScramble:"Scramble", speed:"Hastighet (iterationer / sekund)",
+    scrambleSize:"Scramble-storleksfaktor", randomTime:"Extra slumpmässig tid",
+    optColors:"Slumpfärger", optSup:"Upphöjd",
+    optSeqPaste:"Sekventiellt vid inklistring", optMatrix:"Matrix-läge",
+    secTheme:"Utseende", lblTheme:"Mörk ↔ Ljus",
+    secReset:"Åtgärder", resetBtn:"Rensa"
+  },
+
+  fi:{
+    htmlLang:"fi", title:"Reaaliaikainen glyyfi-sekoitus", placeholder:"KIRJOITA TEKSTI…",
+    lblLanguage:"Kieli", secText:"Teksti", lblFont:"Fontti", lblBaseSize:"Peruskoko",
+    secScramble:"Sekoittaminen", speed:"Nopeus (iteraatiota / sekunti)",
+    scrambleSize:"Kokokerroin", randomTime:"Lisäaika satunnaisesti",
+    optColors:"Satunnaisvärit", optSup:"Yläindeksi",
+    optSeqPaste:"Peräkkäinen liittäminen", optMatrix:"Matrix-tila",
+    secTheme:"Ulkoasu", lblTheme:"Tumma ↔ Vaalea",
+    secReset:"Toiminnot", resetBtn:"Tyhjennä"
+  },
+
+  cs:{
+    htmlLang:"cs", title:"Scramble glyfů v reálném čase", placeholder:"ZADAT TEXT…",
+    lblLanguage:"Jazyk", secText:"Text", lblFont:"Písmo", lblBaseSize:"Základní velikost",
+    secScramble:"Scramble", speed:"Rychlost (iterace / sekundu)",
+    scrambleSize:"Násobič velikosti", randomTime:"Náhodná dodatečná doba",
+    optColors:"Náhodné barvy", optSup:"Horní index",
+    optSeqPaste:"Sekvenčně při vložení", optMatrix:"Matrix režim",
+    secTheme:"Vzhled", lblTheme:"Tmavý ↔ Světlý",
+    secReset:"Akce", resetBtn:"Vymazat"
+  },
+
+  ro:{
+    htmlLang:"ro", title:"Scramble de glife în timp real", placeholder:"INTRODU TEXT…",
+    lblLanguage:"Limbă", secText:"Text", lblFont:"Font", lblBaseSize:"Dimensiune de bază",
+    secScramble:"Scramble", speed:"Viteză (iterații / secundă)",
+    scrambleSize:"Multiplicator dimensiune", randomTime:"Timp suplimentar aleator",
+    optColors:"Culori aleatorii", optSup:"Exponent",
+    optSeqPaste:"Secvențial la lipire", optMatrix:"Mod Matrix",
+    secTheme:"Aspect", lblTheme:"Întunecat ↔ Deschis",
+    secReset:"Acțiuni", resetBtn:"Resetează"
+  },
+
+  bg:{
+    htmlLang:"bg", title:"Скрамблиране на глифове в реално време", placeholder:"ВЪВЕДЕТЕ ТЕКСТ…",
+    lblLanguage:"Език", secText:"Текст", lblFont:"Шрифт", lblBaseSize:"Базов размер",
+    secScramble:"Скрамбъл", speed:"Скорост (итерации / секунда)",
+    scrambleSize:"Множител на размера", randomTime:"Допълнително случайно време",
+    optColors:"Случайни цветове", optSup:"Горен индекс",
+    optSeqPaste:"Последователно при поставяне", optMatrix:"Matrix режим",
+    secTheme:"Външен вид", lblTheme:"Тъмен ↔ Светъл",
+    secReset:"Действия", resetBtn:"Изчисти"
+  },
+
+  ru:{
+    htmlLang:"ru", title:"Скремблирование глифов в реальном времени", placeholder:"ВВЕДИТЕ ТЕКСТ…",
+    lblLanguage:"Язык", secText:"Текст", lblFont:"Шрифт", lblBaseSize:"Базовый размер",
+    secScramble:"Scramble", speed:"Скорость (итераций / сек.)",
+    scrambleSize:"Множитель размера", randomTime:"Дополнительное случайное время",
+    optColors:"Случайные цвета", optSup:"Верхний индекс",
+    optSeqPaste:"Последовательно при вставке", optMatrix:"Режим Matrix",
+    secTheme:"Внешний вид", lblTheme:"Тёмный ↔ Светлый",
+    secReset:"Действия", resetBtn:"Очистить"
+  },
+
+  zh:{
+    htmlLang:"zh", title:"实时字形扰乱", placeholder:"输入文本…",
+    lblLanguage:"语言", secText:"文本", lblFont:"字体", lblBaseSize:"基础字号",
+    secScramble:"扰乱", speed:"速度（次/秒）",
+    scrambleSize:"扰乱大小倍率", randomTime:"额外随机扰乱时间",
+    optColors:"随机颜色", optSup:"上标",
+    optSeqPaste:"粘贴时顺序扰乱", optMatrix:"矩阵模式",
+    secTheme:"外观", lblTheme:"暗 ↔ 亮",
+    secReset:"操作", resetBtn:"清空"
+  },
+
+  hi:{
+    htmlLang:"hi", title:"रीयलटाइम ग्लिफ़ स्क्रैम्बल", placeholder:"पाठ दर्ज करें…",
+    lblLanguage:"भाषा", secText:"पाठ", lblFont:"फ़ॉन्ट", lblBaseSize:"आधार आकार",
+    secScramble:"स्क्रैम्बल", speed:"गति (इटरेशन/सेकंड)",
+    scrambleSize:"स्क्रैम्बल आकार गुणक", randomTime:"अतिरिक्त यादृच्छिक समय",
+    optColors:"यादृच्छिक रंग", optSup:"सुपरस्क्रिप्ट",
+    optSeqPaste:"पेस्ट पर क्रमिक", optMatrix:"मैट्रिक्स मोड",
+    secTheme:"दिखावट", lblTheme:"डार्क ↔ लाइट",
+    secReset:"क्रियाएँ", resetBtn:"सब साफ़ करें"
+  },
+
   ja:{
     htmlLang:"ja", title:"リアルタイム・グリフスクランブル", placeholder:"テキストを入力…",
     lblLanguage:"言語", secText:"テキスト", lblFont:"フォント", lblBaseSize:"基本サイズ",
     secScramble:"スクランブル", speed:"速度（回/秒）",
-    scrambleSize:"スクランブル倍率",
-    randomTime:"追加ランダム時間",
-    optColors:"ランダムカラー",
-    optSup:"上付き",
-    optSeqPaste:"貼り付け時に順次",
-    optMatrix:"マトリックスモード",
+    scrambleSize:"スクランブル倍率", randomTime:"追加ランダム時間",
+    optColors:"ランダムカラー", optSup:"上付き",
+    optSeqPaste:"貼り付け時に順次", optMatrix:"マトリックスモード",
     secTheme:"表示", lblTheme:"ダーク ↔ ライト",
     secReset:"操作", resetBtn:"すべてクリア"
   }
 };
 
-/* ================= SCRAMBLE ENGINE ================= */
-const output = document.getElementById("output");
-const input  = document.getElementById("input");
+/* ================= SCRAMBLE ENGINE (unchanged) ================= */
+const output=document.getElementById("output");
+const input=document.getElementById("input");
 
 let glyphs=[];
 let speed=3, scrambleSize=1, randomColors=false, superscript=false,
@@ -352,49 +466,46 @@ class Glyph{
     output.appendChild(this.span);
     this.run();
   }
-
   run(){
     this._token=(this._token||0)+1;
     const token=this._token;
 
-    const interval = 1000 / speed;
-    const baseIterations = 6;
-    const extraIterations = maxExtraTime > 0
-      ? Math.floor(Math.random() * (maxExtraTime*1000 / interval))
+    const interval=1000/speed;
+    const baseIterations=6;
+    const extraIterations=maxExtraTime>0
+      ? Math.floor(Math.random()*(maxExtraTime*1000/interval))
       : 0;
-    const maxIterations = baseIterations + extraIterations;
+    const maxIterations=baseIterations+extraIterations;
 
-    const start = () => {
+    const start=()=>{
       let i=0;
-      const step = () => {
+      const step=()=>{
         if(token!==this._token) return;
-        if(i++ >= maxIterations){ this.lock(); return; }
+        if(i++>=maxIterations){ this.lock(); return; }
 
         if(this.hidden){
           this.hidden=false;
           this.span.style.opacity="1";
         }
 
-        this.span.style.fontFamily = matrixMode ? matrixFont : rand(normalFonts);
-        this.span.style.fontSize = `calc(var(--size) * ${scrambleSize})`;
-        this.span.style.verticalAlign = superscript ? "super" : "baseline";
-        this.span.style.color = matrixMode
+        this.span.style.fontFamily=matrixMode?matrixFont:rand(normalFonts);
+        this.span.style.fontSize=`calc(var(--size)*${scrambleSize})`;
+        this.span.style.verticalAlign=superscript?"super":"baseline";
+        this.span.style.color=matrixMode
           ? "var(--matrix-green)"
           : randomColors ? randColor() : "";
 
-        const pool = matrixMode ? matrixPool : normalPool;
-        this.span.textContent =
-          this.target===" " ? NBSP : pool[Math.random()*pool.length|0];
+        const pool=matrixMode?matrixPool:normalPool;
+        this.span.textContent=this.target===" "?NBSP:pool[Math.random()*pool.length|0];
 
-        setTimeout(()=>requestAnimationFrame(step), interval);
+        setTimeout(()=>requestAnimationFrame(step),interval);
       };
       requestAnimationFrame(step);
     };
 
-    if(this.delay>0) setTimeout(start, this.delay);
+    if(this.delay>0) setTimeout(start,this.delay);
     else start();
   }
-
   lock(){
     this.span.style.fontFamily="";
     this.span.style.fontSize="";
@@ -403,14 +514,12 @@ class Glyph{
     this.span.style.opacity="1";
     this.span.textContent=this.target===" "?NBSP:this.target;
   }
-
   remove(){
     this._token=(this._token||0)+1;
     this.span.remove();
   }
 }
 
-/* SYNC */
 function syncToValue(val, delayMap=null, hideMap=null){
   while(glyphs.length>val.length) glyphs.pop().remove();
 
@@ -490,12 +599,15 @@ function applyLang(l){
   document.documentElement.lang=t.htmlLang;
   document.title=t.title;
   input.placeholder=t.placeholder;
-  document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=t[el.dataset.i18n]);
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    el.textContent=t[el.dataset.i18n];
+  });
   speedLabel.textContent=`${t.speed}: ${speed}`;
   scrambleSizeLabel.textContent=`${t.scrambleSize}: ${scrambleSize.toFixed(2)}×`;
   randomTimeLabel.textContent=`${t.randomTime}: ${maxExtraTime.toFixed(1)} s`;
 }
 applyLang("de");
 </script>
+
 </body>
 </html>
