@@ -279,13 +279,24 @@ textarea{
     <div class="section">
       <div class="section-title" data-i18n="secText"></div>
 
-      <label data-i18n="lblFont"></label>
-      <select id="fontSelect">
-        <option value="Inter">Inter</option>
-        <option value="Space Grotesk">Space Grotesk</option>
-        <option value="IBM Plex Mono">IBM Plex Mono</option>
-        <option value="JetBrains Mono">JetBrains Mono</option>
-      </select>
+<select id="fontSelect">
+  <!-- Webfonts -->
+  <option value="Inter">Inter</option>
+  <option value="Space Grotesk">Space Grotesk</option>
+  <option value="IBM Plex Mono">IBM Plex Mono</option>
+  <option value="JetBrains Mono">JetBrains Mono</option>
+
+  <!-- System Sans -->
+  <option value="Arial">Arial</option>
+  <option value="Calibri">Calibri (Windows)</option>
+  <option value="Segoe UI">Segoe UI (Windows)</option>
+  <option value="Helvetica">Helvetica (macOS)</option>
+
+  <!-- System Serif -->
+  <option value="Times New Roman">Times New Roman</option>
+  <option value="Georgia">Georgia</option>
+</select>
+
 
       <label data-i18n="lblBaseSize"></label>
       <input id="size" type="range" min="12" max="42" step="1" value="16">
@@ -550,26 +561,61 @@ let speed=6, scrambleSize=1, randomColors=false, superscript=false,
 const NBSP="\u00A0";
 const normalPool="AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTuUvVwWxXyYzZ0123456789!@#$%^&*()-_=+[]{}<>?/\\|~;:,.";
 const matrixPool="アイウエオカキクケコサシスセソタチツテトナニヌネノAaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTuUvVwWxXyYzZ0123456789!@#$%^&*()-_=+[]{}<>?/\\|~;:,.";
-const normalFonts=["Inter","IBM Plex Mono","JetBrains Mono","Space Grotesk"];
+const normalFonts = [
+  // Webfonts
+  "Inter",
+  "Space Grotesk",
+  "IBM Plex Mono",
+  "JetBrains Mono",
+
+  // System Sans
+  "Arial",
+  "Calibri",
+  "Segoe UI",
+  "Helvetica",
+  "Verdana",
+
+  // System Serif
+  "Times New Roman",
+  "Georgia"
+];
+
+
 const matrixFont="IBM Plex Mono, monospace";
 
 function rand(arr){ return arr[Math.random()*arr.length|0]; }
 function randColor(){ return `rgb(${Math.random()*255|0},${Math.random()*255|0},${Math.random()*255|0})`; }
 
 class Glyph{
-  constructor(ch, delay=0, hidden=false){
-    this.target=ch;
-    this.delay=delay;
-    this.hidden=hidden;
-    this.locked=false;     // NEW: export end/progress
-    this.span=document.createElement("span");
-    this.span.className="char";
-    this.span.textContent=ch===" "?NBSP:ch;
-    if(hidden) this.span.style.opacity="0";
+constructor(ch, delay=0, hidden=false){
+  this.target = ch;
+  this.delay = delay;
+  this.hidden = hidden;
+  this.locked = false;
+
+  // ✅ NEW: Zeilenumbruch korrekt behandeln
+  if(ch === "\n"){
+    this.isNewline = true;
+    this.span = document.createElement("br");
     output.appendChild(this.span);
-    this.run();
+    return;
   }
-  run(){
+
+  this.isNewline = false;
+
+  this.span = document.createElement("span");
+  this.span.className = "char";
+  this.span.textContent = ch === " " ? NBSP : ch;
+
+  if(hidden) this.span.style.opacity = "0";
+
+  output.appendChild(this.span);
+  this.run();
+}
+
+run(){
+  if(this.isNewline) return;
+
     this.locked=false;
     this._token=(this._token||0)+1;
     const token=this._token;
@@ -612,7 +658,9 @@ this.span.style.color = matrixMode
     if(this.delay>0) setTimeout(start,this.delay);
     else start();
   }
-  lock(){
+lock(){
+  if(this.isNewline) return;
+
     this.span.style.fontFamily="";
     this.span.style.fontSize="";
     this.span.style.verticalAlign="";
@@ -857,7 +905,24 @@ function getExportStyleSnapshot(){
 }
 
 function makeCanvasFont(fontFamily, sizePx, weight=300){
-  return `${weight} ${sizePx}px ${fontFamily}, system-ui, sans-serif`;
+  const fontStack = [
+    fontFamily,
+
+    // Fallbacks (geordnet nach Verfügbarkeit)
+    "Inter",
+    "Segoe UI",
+    "Arial",
+    "Calibri",
+    "Helvetica",
+    "Verdana",
+    "Times New Roman",
+    "Georgia",
+
+    "system-ui",
+    "sans-serif"
+  ].join(", ");
+
+  return `${weight} ${sizePx}px ${fontStack}`;
 }
 
 function measureTokenWidth(ctx, token, letterSpacingPx){
@@ -866,7 +931,8 @@ function measureTokenWidth(ctx, token, letterSpacingPx){
   for(let i=0;i<token.length;i++){
     const ch = token[i]===" " ? NBSP : token[i];
     w += (ctx.measureText(ch).width || 0);
-    if(i < token.length-1) w += letterSpacingPx;
+w += letterSpacingPx;
+
   }
   return w;
 }
@@ -936,7 +1002,14 @@ function layoutTokensToCharPositions(ctx, text, maxWidth, letterSpacingPx, paddi
           // hard case: single word longer than line => char wrap
           for(let i=0;i<tok.length;i++){
             const ch = tok[i];
-            const adv = (ctx.measureText(ch===" " ? NBSP : ch).width || 0) + (i < tok.length-1 ? letterSpacingPx : 0);
+const isSpace = ch === " ";
+const glyph = isSpace ? NBSP : ch;
+
+let adv = (ctx.measureText(glyph).width || 0);
+
+// ✅ letter-spacing auch für Spaces anwenden
+adv += letterSpacingPx;
+
 
             // if char doesn't fit, newline
             if(x > paddingLeft && (x + adv) > (paddingLeft + maxWidth)){
@@ -1022,7 +1095,11 @@ const canvas = document.createElement("canvas");
 const TEMP_WIDTH = 4096;
 canvas.width = TEMP_WIDTH;
 
-const ctx = canvas.getContext("2d", {alpha:false});
+const ctx = canvas.getContext("2d", {
+  alpha: true,
+  colorSpace: "srgb"
+});
+
 ctx.textBaseline = "top";
 
   // base layout font
@@ -1078,8 +1155,9 @@ canvas.width = Math.min(
   const stream = canvas.captureStream(FPS);
 const rec = new MediaRecorder(stream, {
   mimeType,
-  videoBitsPerSecond: 6_000_000
+  videoBitsPerSecond: codec === "vp9" ? 3_000_000 : 6_000_000
 });
+
 
 
   const chunks=[];
@@ -1226,15 +1304,15 @@ a.download = `scramble_${codec}.webm`;
 async function exportGif(){
   showExportOverlay();
 
-  const FPS = 15;
-  const durationMs = 5000;
+  const FPS = 8;
+  const durationMs = 3000;
   const frameCount = Math.floor((durationMs / 1000) * FPS);
 
   const S = getExportStyleSnapshot();
 
   const canvas = document.createElement("canvas");
-  canvas.width = 720;
-  canvas.height = 400;
+  canvas.width = 480;
+  canvas.height = 260;
   const ctx = canvas.getContext("2d");
   ctx.textBaseline = "top";
 
@@ -1244,18 +1322,19 @@ async function exportGif(){
     ctx.fillStyle = S.bg;
     ctx.fillRect(0,0,canvas.width,canvas.height);
 
+    // ⚠️ bewusst simpel (stabil!)
     ctx.fillStyle = S.fg;
     ctx.font = `${S.fontSizeBase}px ${S.fontFamilyUI}`;
     ctx.fillText(input.value || "", S.paddingLeft, S.paddingTop);
 
     frames.push(canvas.toDataURL("image/png"));
 
-    const p = Math.round((i / frameCount) * 90); // 🔹 nur bis 90 %
+    const p = Math.round((i / frameCount) * 90);
     exportPct.textContent = p + "%";
     exportBarInner.style.width = p + "%";
 
-    // ✅ WICHTIG: Firefox Event-Loop freigeben
-    await new Promise(r => setTimeout(r, 0));
+    // 🔑 Chromium braucht echten Yield
+    await new Promise(r => setTimeout(r, 20));
   }
 
   exportPct.textContent = "95%";
@@ -1266,7 +1345,8 @@ async function exportGif(){
     gifWidth: canvas.width,
     gifHeight: canvas.height,
     interval: 1 / FPS,
-    numWorkers: 0
+    numWorkers: 1,
+    sampleInterval: 10
   }, function(result){
     if(result.error){
       hideExportOverlay();
@@ -1298,6 +1378,23 @@ document.getElementById("exportVp9").onclick = () =>
 document.getElementById("exportGif").onclick = () => exportGif();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 </script>
 
 </body>
