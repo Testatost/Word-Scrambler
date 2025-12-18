@@ -926,16 +926,20 @@ function makeCanvasFont(fontFamily, sizePx, weight=300){
 }
 
 function measureTokenWidth(ctx, token, letterSpacingPx){
-  // token can include spaces; preserve them; treat regular space as NBSP for measurement consistency
-  let w=0;
-  for(let i=0;i<token.length;i++){
-    const ch = token[i]===" " ? NBSP : token[i];
-    w += (ctx.measureText(ch).width || 0);
-w += letterSpacingPx;
+  let w = 0;
+  for(const ch of token){
+    const isSpace = ch === " ";
+    const glyph = isSpace ? NBSP : ch;
+    const gw = ctx.measureText(glyph).width || 0;
 
+    // CSS-korrekt:
+    // - normale Zeichen: + letter-spacing
+    // - Space: spacing links + rechts
+    w += gw + letterSpacingPx * (isSpace ? 2 : 1);
   }
   return w;
 }
+
 
 function tokenizePreserve(text){
   // tokens: "\n" as own token, runs of spaces as token, runs of non-space non-newline as token
@@ -1027,20 +1031,33 @@ adv += letterSpacingPx;
       }
     }
 
-    // place token normally
-    for(let i=0;i<tok.length;i++){
-      const ch = tok[i];
-      const adv = (ctx.measureText(ch===" " ? NBSP : ch).width || 0) + (i < tok.length-1 ? letterSpacingPx : 0);
+for(let i=0;i<tok.length;i++){
+  const ch = tok[i];
+  const isSpace = ch === " ";
+  const glyph = isSpace ? NBSP : ch;
+  const gw = ctx.measureText(glyph).width || 0;
 
-      // Just in case (tiny maxWidth): char wrap
-      if(x > paddingLeft && (x + adv) > (paddingLeft + maxWidth)){
-        newLine();
-      }
+  // CSS-korrektes Advance
+  const adv = gw + letterSpacingPx * (isSpace ? 2 : 1);
 
-      positions.push({ ch, x, y, indexInText: globalIndex });
-      x += adv;
-      globalIndex += 1;
-    }
+  if(x > paddingLeft && (x + adv) > (paddingLeft + maxWidth)){
+    newLine();
+  }
+
+  // ⬅️ Space optisch zentrieren
+  const drawX = x + (isSpace ? letterSpacingPx : 0);
+
+  positions.push({
+    ch,
+    x: drawX,
+    y,
+    indexInText: globalIndex
+  });
+
+  x += adv;
+  globalIndex += 1;
+}
+
   }
 
   const usedLines = Math.max(1, Math.round(((y - paddingTop) / lineHeightPx) + 1));
@@ -1378,23 +1395,6 @@ document.getElementById("exportVp9").onclick = () =>
 document.getElementById("exportGif").onclick = () => exportGif();
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
 </script>
 
 </body>
