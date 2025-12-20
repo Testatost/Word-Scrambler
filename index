@@ -6,8 +6,6 @@
 <title>Word-Scrambler</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=IBM+Plex+Mono:wght@300;600&family=JetBrains+Mono:wght@300;600&family=Space+Grotesk:wght@300;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/gifshot@0.3.2/gifshot.min.js"></script>
-
 
 <style>
 :root{
@@ -246,33 +244,35 @@ textarea{
 
     <!-- NEW: COLORS -->
     <div class="section">
-      <div class="section-title">Farben</div>
+<div class="section-title" data-i18n="secColors"></div>
+
 
       <div class="row">
         <div class="col">
-          <label>Hintergrund</label>
-          <select id="bgSelect">
-            <option value="#000000">Schwarz</option>
-            <option value="#161618">Richtiges Grau #161618</option>
-            <option value="#212121">Alt. Hintergrund #212121</option>
-            <option value="#2a2e31">Alt. Hintergrund 2 #2a2e31</option>
-          </select>
+<label data-i18n="lblBackground"></label>
+<select id="bgSelect">
+  <option value="#000000" data-label-key="bgBlack"></option>
+  <option value="#161618" data-label-key="bgTrueGray"></option>
+  <option value="#212121" data-label-key="bgAlt1"></option>
+  <option value="#2a2e31" data-label-key="bgAlt2"></option>
+</select>
+
         </div>
         <div class="col">
-          <label>Schrift</label>
-          <select id="fgSelect">
-            <option value="#888888">Schrift (ausgegraut) #888888</option>
-            <option value="#f2f5f4" selected>Schrift #f2f5f4</option>
-            <option value="#75c0c7">Link #75c0c7</option>
-            <option value="#008fff">Episches Blau #008fff</option>
-            <option value="#1db992">Angenehmes Grün #1db992</option>
-            <option value="#bfbc06">Olivgrün d. Friedens #bfbc06</option>
-            <option value="#f7c516">Ein Gelb #f7c516</option>
-            <option value="#fc8833">DOOFES PASSIERT #fc8833</option>
-            <option value="#ee4d2e">Orange #ee4d2e</option>
-            <option value="#d23c22">Logo-Orange #d23c22</option>
-            <option value="#ff0082">Altes pr0gramm #ff0082</option>
-          </select>
+<label data-i18n="lblForeground"></label>
+<select id="fgSelect">
+  <option value="#888888" data-label-key="fgMuted"></option>
+  <option value="#f2f5f4" data-label-key="fgText" selected></option>
+  <option value="#75c0c7" data-label-key="fgLink"></option>
+  <option value="#008fff" data-label-key="fgEpicBlue"></option>
+  <option value="#1db992" data-label-key="fgSoftGreen"></option>
+  <option value="#bfbc06" data-label-key="fgOlive"></option>
+  <option value="#f7c516" data-label-key="fgYellow"></option>
+  <option value="#fc8833" data-label-key="fgAlert"></option>
+  <option value="#ee4d2e" data-label-key="fgOrange"></option>
+  <option value="#d23c22" data-label-key="fgLogoOrange"></option>
+  <option value="#ff0082" data-label-key="fgLegacyPink"></option>
+</select>
         </div>
       </div>
     </div>
@@ -336,7 +336,8 @@ textarea{
   <span data-i18n="optMatrix"></span>
 
   <input id="matrixGreenToggle" type="checkbox" style="margin-left:12px">
-  <span>Grün</span>
+<span data-i18n="optMatrixGreen"></span>
+
 </div>
 
     </div>
@@ -349,12 +350,12 @@ textarea{
 
     <!-- NEW: EXPORT -->
 <div class="section">
-<div class="section-title">Export</div>
+<div class="section-title" data-i18n="secExport"></div>
+
 
 <div class="row">
   <button id="exportVp8" class="export" type="button">WebM (VP8)</button>
   <button id="exportVp9" class="export" type="button">WebM (VP9)</button>
-  <button id="exportGif" class="export" type="button">GIF</button>
 </div>
 </div>
 
@@ -385,7 +386,30 @@ const I18N = {
     optColors:"Zufällige Scramble-Farben", optSup:"Scramble hochgestellt",
     optSeqPaste:"Sequenziell beim Einfügen", optMatrix:"Matrix-Modus",
     secTheme:"Darstellung", lblTheme:"Dunkel ↔ Hell",
-    secReset:"Aktionen", resetBtn:"Alles löschen"
+    secReset:"Aktionen", resetBtn:"Alles löschen",
+    secColors:"Farben",
+lblBackground:"Hintergrund",
+lblForeground:"Schrift",
+optMatrixGreen:"Grün",
+secExport:"Export",
+bgBlack:"Schwarz",
+bgTrueGray:"Richtiges Grau",
+bgAlt1:"Alternativer Hintergrund",
+bgAlt2:"Alternativer Hintergrund 2",
+
+fgMuted:"Schrift (ausgegraut)",
+fgText:"Schrift",
+fgLink:"Link",
+fgEpicBlue:"Episches Blau",
+fgSoftGreen:"Angenehmes Grün",
+fgOlive:"Olivgrün des Friedens",
+fgYellow:"Gelb",
+fgAlert:"Warnfarbe",
+fgOrange:"Orange",
+fgLogoOrange:"Logo-Orange",
+fgLegacyPink:"Altes pr0gramm",
+
+
   },
   en:{
     htmlLang:"en", title:"Realtime Glyph Scramble", placeholder:"TYPE TEXT…",
@@ -395,7 +419,30 @@ const I18N = {
     optColors:"Random Scramble Colors", optSup:"Superscript Scramble",
     optSeqPaste:"Sequential on Paste", optMatrix:"Matrix Mode",
     secTheme:"Appearance", lblTheme:"Dark ↔ Light",
-    secReset:"Actions", resetBtn:"Reset"
+    secReset:"Actions", resetBtn:"Reset",
+    secColors:"Colors",
+lblBackground:"Background",
+lblForeground:"Text",
+optMatrixGreen:"Green",
+secExport:"Export",
+bgBlack:"Black",
+bgTrueGray:"True Gray",
+bgAlt1:"Alternative Background",
+bgAlt2:"Alternative Background 2",
+
+fgMuted:"Muted Text",
+fgText:"Text",
+fgLink:"Link",
+fgEpicBlue:"Epic Blue",
+fgSoftGreen:"Soft Green",
+fgOlive:"Olive Green",
+fgYellow:"Yellow",
+fgAlert:"Alert Color",
+fgOrange:"Orange",
+fgLogoOrange:"Logo Orange",
+fgLegacyPink:"Legacy Pink",
+
+
   },
   fr:{
     htmlLang:"fr", title:"Scramble de glyphes en temps réel", placeholder:"SAISIR DU TEXTE…",
@@ -405,7 +452,30 @@ const I18N = {
     optColors:"Couleurs aléatoires", optSup:"Exposant",
     optSeqPaste:"Séquentiel au collage", optMatrix:"Mode Matrix",
     secTheme:"Apparence", lblTheme:"Sombre ↔ Clair",
-    secReset:"Actions", resetBtn:"Réinitialiser"
+    secReset:"Actions", resetBtn:"Réinitialiser",
+    secColors:"Couleurs",
+lblBackground:"Arrière-plan",
+lblForeground:"Texte",
+optMatrixGreen:"Vert",
+secExport:"Export",
+bgBlack:"Noir",
+bgTrueGray:"Gris réel",
+bgAlt1:"Arrière-plan alternatif",
+bgAlt2:"Arrière-plan alternatif 2",
+
+fgMuted:"Texte atténué",
+fgText:"Texte",
+fgLink:"Lien",
+fgEpicBlue:"Bleu épique",
+fgSoftGreen:"Vert doux",
+fgOlive:"Vert olive",
+fgYellow:"Jaune",
+fgAlert:"Couleur d’alerte",
+fgOrange:"Orange",
+fgLogoOrange:"Orange du logo",
+fgLegacyPink:"Rose ancien",
+
+
   },
   es:{
     htmlLang:"es", title:"Scramble de glifos en tiempo real", placeholder:"ESCRIBE TEXTO…",
@@ -415,7 +485,30 @@ const I18N = {
     optColors:"Colores aleatorios", optSup:"Superíndice",
     optSeqPaste:"Secuencial al pegar", optMatrix:"Modo Matrix",
     secTheme:"Apariencia", lblTheme:"Oscuro ↔ Claro",
-    secReset:"Acciones", resetBtn:"Restablecer"
+    secReset:"Acciones", resetBtn:"Restablecer",
+    secColors:"Colores",
+lblBackground:"Fondo",
+lblForeground:"Texto",
+optMatrixGreen:"Verde",
+secExport:"Exportar",
+bgBlack:"Negro",
+bgTrueGray:"Gris real",
+bgAlt1:"Fondo alternativo",
+bgAlt2:"Fondo alternativo 2",
+
+fgMuted:"Texto atenuado",
+fgText:"Texto",
+fgLink:"Enlace",
+fgEpicBlue:"Azul épico",
+fgSoftGreen:"Verde suave",
+fgOlive:"Verde oliva",
+fgYellow:"Amarillo",
+fgAlert:"Color de alerta",
+fgOrange:"Naranja",
+fgLogoOrange:"Naranja del logo",
+fgLegacyPink:"Rosa antiguo",
+
+
   },
   it:{
     htmlLang:"it", title:"Scramble di glifi in tempo reale", placeholder:"INSERISCI TESTO…",
@@ -425,7 +518,30 @@ const I18N = {
     optColors:"Colori casuali", optSup:"Apice",
     optSeqPaste:"Sequenziale all'incolla", optMatrix:"Modalità Matrix",
     secTheme:"Aspetto", lblTheme:"Scuro ↔ Chiaro",
-    secReset:"Azioni", resetBtn:"Reimposta"
+    secReset:"Azioni", resetBtn:"Reimposta",
+    secColors:"Colori",
+lblBackground:"Sfondo",
+lblForeground:"Testo",
+optMatrixGreen:"Verde",
+secExport:"Esporta",
+bgBlack:"Nero",
+bgTrueGray:"Grigio reale",
+bgAlt1:"Sfondo alternativo",
+bgAlt2:"Sfondo alternativo 2",
+
+fgMuted:"Testo attenuato",
+fgText:"Testo",
+fgLink:"Link",
+fgEpicBlue:"Blu epico",
+fgSoftGreen:"Verde tenue",
+fgOlive:"Verde oliva",
+fgYellow:"Giallo",
+fgAlert:"Colore di avviso",
+fgOrange:"Arancione",
+fgLogoOrange:"Arancione logo",
+fgLegacyPink:"Rosa storico",
+
+
   },
   nl:{
     htmlLang:"nl", title:"Realtime Glyph Scramble", placeholder:"TEKST INVOEREN…",
@@ -435,7 +551,30 @@ const I18N = {
     optColors:"Willekeurige kleuren", optSup:"Superscript",
     optSeqPaste:"Sequentieel bij plakken", optMatrix:"Matrix-modus",
     secTheme:"Weergave", lblTheme:"Donker ↔ Licht",
-    secReset:"Acties", resetBtn:"Reset"
+    secReset:"Acties", resetBtn:"Reset",
+    secColors:"Kleuren",
+lblBackground:"Achtergrond",
+lblForeground:"Tekst",
+optMatrixGreen:"Groen",
+secExport:"Exporteren",
+bgBlack:"Zwart",
+bgTrueGray:"Echt grijs",
+bgAlt1:"Alternatieve achtergrond",
+bgAlt2:"Alternatieve achtergrond 2",
+
+fgMuted:"Gedempte tekst",
+fgText:"Tekst",
+fgLink:"Link",
+fgEpicBlue:"Episch blauw",
+fgSoftGreen:"Zacht groen",
+fgOlive:"Olijfgroen",
+fgYellow:"Geel",
+fgAlert:"Waarschuwingskleur",
+fgOrange:"Oranje",
+fgLogoOrange:"Logo-oranje",
+fgLegacyPink:"Oud roze",
+
+
   },
   pl:{
     htmlLang:"pl", title:"Scramble glifów w czasie rzeczywistym", placeholder:"WPISZ TEKST…",
@@ -445,7 +584,30 @@ const I18N = {
     optColors:"Losowe kolory", optSup:"Indeks górny",
     optSeqPaste:"Sekwencyjnie przy wklejaniu", optMatrix:"Tryb Matrix",
     secTheme:"Wygląd", lblTheme:"Ciemny ↔ Jasny",
-    secReset:"Akcje", resetBtn:"Wyczyść"
+    secReset:"Akcje", resetBtn:"Wyczyść",
+    secColors:"Kolory",
+lblBackground:"Tło",
+lblForeground:"Tekst",
+optMatrixGreen:"Zielony",
+secExport:"Eksport",
+bgBlack:"Czarny",
+bgTrueGray:"Prawdziwa szarość",
+bgAlt1:"Alternatywne tło",
+bgAlt2:"Alternatywne tło 2",
+
+fgMuted:"Przygaszony tekst",
+fgText:"Tekst",
+fgLink:"Link",
+fgEpicBlue:"Epicki niebieski",
+fgSoftGreen:"Delikatna zieleń",
+fgOlive:"Oliwkowy",
+fgYellow:"Żółty",
+fgAlert:"Kolor ostrzegawczy",
+fgOrange:"Pomarańczowy",
+fgLogoOrange:"Pomarańczowy logo",
+fgLegacyPink:"Stary róż",
+
+
   },
   pt:{
     htmlLang:"pt", title:"Scramble de glifos em tempo real", placeholder:"DIGITE TEXTO…",
@@ -455,7 +617,30 @@ const I18N = {
     optColors:"Cores aleatórias", optSup:"Sobrescrito",
     optSeqPaste:"Sequencial ao colar", optMatrix:"Modo Matrix",
     secTheme:"Aparência", lblTheme:"Escuro ↔ Claro",
-    secReset:"Ações", resetBtn:"Redefinir"
+    secReset:"Ações", resetBtn:"Redefinir",
+    secColors:"Cores",
+lblBackground:"Fundo",
+lblForeground:"Texto",
+optMatrixGreen:"Verde",
+secExport:"Exportar",
+bgBlack:"Preto",
+bgTrueGray:"Cinza real",
+bgAlt1:"Fundo alternativo",
+bgAlt2:"Fundo alternativo 2",
+
+fgMuted:"Texto suave",
+fgText:"Texto",
+fgLink:"Link",
+fgEpicBlue:"Azul épico",
+fgSoftGreen:"Verde suave",
+fgOlive:"Verde oliva",
+fgYellow:"Amarelo",
+fgAlert:"Cor de alerta",
+fgOrange:"Laranja",
+fgLogoOrange:"Laranja do logo",
+fgLegacyPink:"Rosa antigo",
+
+
   },
   sv:{
     htmlLang:"sv", title:"Realtids-glyph-scramble", placeholder:"SKRIV TEXT…",
@@ -465,7 +650,30 @@ const I18N = {
     optColors:"Slumpfärger", optSup:"Upphöjd",
     optSeqPaste:"Sekventiellt vid inklistring", optMatrix:"Matrix-läge",
     secTheme:"Utseende", lblTheme:"Mörk ↔ Ljus",
-    secReset:"Åtgärder", resetBtn:"Rensa"
+    secReset:"Åtgärder", resetBtn:"Rensa",
+    secColors:"Färger",
+lblBackground:"Bakgrund",
+lblForeground:"Text",
+optMatrixGreen:"Grön",
+secExport:"Export",
+bgBlack:"Svart",
+bgTrueGray:"Äkta grå",
+bgAlt1:"Alternativ bakgrund",
+bgAlt2:"Alternativ bakgrund 2",
+
+fgMuted:"Dämpad text",
+fgText:"Text",
+fgLink:"Länk",
+fgEpicBlue:"Episk blå",
+fgSoftGreen:"Mjuk grön",
+fgOlive:"Olivgrön",
+fgYellow:"Gul",
+fgAlert:"Varningsfärg",
+fgOrange:"Orange",
+fgLogoOrange:"Logotyp-orange",
+fgLegacyPink:"Gammal rosa",
+
+
   },
   fi:{
     htmlLang:"fi", title:"Reaaliaikainen glyyfi-sekoitus", placeholder:"KIRJOITA TEKSTI…",
@@ -475,7 +683,30 @@ const I18N = {
     optColors:"Satunnaisvärit", optSup:"Yläindeksi",
     optSeqPaste:"Peräkkäinen liittäminen", optMatrix:"Matrix-tila",
     secTheme:"Ulkoasu", lblTheme:"Tumma ↔ Vaalea",
-    secReset:"Toiminnot", resetBtn:"Tyhjennä"
+    secReset:"Toiminnot", resetBtn:"Tyhjennä",
+    secColors:"Värit",
+lblBackground:"Tausta",
+lblForeground:"Teksti",
+optMatrixGreen:"Vihreä",
+secExport:"Vienti",
+bgBlack:"Musta",
+bgTrueGray:"Aito harmaa",
+bgAlt1:"Vaihtoehtoinen tausta",
+bgAlt2:"Vaihtoehtoinen tausta 2",
+
+fgMuted:"Häivytetty teksti",
+fgText:"Teksti",
+fgLink:"Linkki",
+fgEpicBlue:"Eeppinen sininen",
+fgSoftGreen:"Pehmeä vihreä",
+fgOlive:"Oliivinvihreä",
+fgYellow:"Keltainen",
+fgAlert:"Varoitusväri",
+fgOrange:"Oranssi",
+fgLogoOrange:"Logon oranssi",
+fgLegacyPink:"Vanha pinkki",
+
+
   },
   cs:{
     htmlLang:"cs", title:"Scramble glyfů v reálném čase", placeholder:"ZADAT TEXT…",
@@ -485,7 +716,30 @@ const I18N = {
     optColors:"Náhodné barvy", optSup:"Horní index",
     optSeqPaste:"Sekvenčně při vložení", optMatrix:"Matrix režim",
     secTheme:"Vzhled", lblTheme:"Tmavý ↔ Světlý",
-    secReset:"Akce", resetBtn:"Vymazat"
+    secReset:"Akce", resetBtn:"Vymazat",
+    secColors:"Barvy",
+lblBackground:"Pozadí",
+lblForeground:"Text",
+optMatrixGreen:"Zelená",
+secExport:"Export",
+bgBlack:"Černá",
+bgTrueGray:"Skutečná šedá",
+bgAlt1:"Alternativní pozadí",
+bgAlt2:"Alternativní pozadí 2",
+
+fgMuted:"Tlumený text",
+fgText:"Text",
+fgLink:"Odkaz",
+fgEpicBlue:"Epická modrá",
+fgSoftGreen:"Jemná zelená",
+fgOlive:"Olivová",
+fgYellow:"Žlutá",
+fgAlert:"Výstražná barva",
+fgOrange:"Oranžová",
+fgLogoOrange:"Logo oranžová",
+fgLegacyPink:"Starorůžová",
+
+
   },
   ro:{
     htmlLang:"ro", title:"Scramble de glife în timp real", placeholder:"INTRODU TEXT…",
@@ -495,7 +749,30 @@ const I18N = {
     optColors:"Culori aleatorii", optSup:"Exponent",
     optSeqPaste:"Secvențial la lipire", optMatrix:"Mod Matrix",
     secTheme:"Aspect", lblTheme:"Întunecat ↔ Deschis",
-    secReset:"Acțiuni", resetBtn:"Resetează"
+    secReset:"Acțiuni", resetBtn:"Resetează",
+    secColors:"Culori",
+lblBackground:"Fundal",
+lblForeground:"Text",
+optMatrixGreen:"Verde",
+secExport:"Export",
+bgBlack:"Negru",
+bgTrueGray:"Gri real",
+bgAlt1:"Fundal alternativ",
+bgAlt2:"Fundal alternativ 2",
+
+fgMuted:"Text estompat",
+fgText:"Text",
+fgLink:"Link",
+fgEpicBlue:"Albastru epic",
+fgSoftGreen:"Verde moale",
+fgOlive:"Verde măsliniu",
+fgYellow:"Galben",
+fgAlert:"Culoare de alertă",
+fgOrange:"Portocaliu",
+fgLogoOrange:"Portocaliu logo",
+fgLegacyPink:"Roz vechi",
+
+
   },
   bg:{
     htmlLang:"bg", title:"Скрамблиране на глифове в реално време", placeholder:"ВЪВЕДЕТЕ ТЕКСТ…",
@@ -505,7 +782,30 @@ const I18N = {
     optColors:"Случайни цветове", optSup:"Горен индекс",
     optSeqPaste:"Последователно при поставяне", optMatrix:"Matrix режим",
     secTheme:"Външен вид", lblTheme:"Тъмен ↔ Светъл",
-    secReset:"Действия", resetBtn:"Изчисти"
+    secReset:"Действия", resetBtn:"Изчисти",
+    secColors:"Цветове",
+lblBackground:"Фон",
+lblForeground:"Текст",
+optMatrixGreen:"Зелено",
+secExport:"Експорт",
+bgBlack:"Черно",
+bgTrueGray:"Истинско сиво",
+bgAlt1:"Алтернативен фон",
+bgAlt2:"Алтернативен фон 2",
+
+fgMuted:"Приглушен текст",
+fgText:"Текст",
+fgLink:"Връзка",
+fgEpicBlue:"Епично синьо",
+fgSoftGreen:"Меко зелено",
+fgOlive:"Маслинено зелено",
+fgYellow:"Жълто",
+fgAlert:"Предупредителен цвят",
+fgOrange:"Оранжево",
+fgLogoOrange:"Лого оранжево",
+fgLegacyPink:"Старо розово",
+
+
   },
   ru:{
     htmlLang:"ru", title:"Скремблирование глифов в реальном времени", placeholder:"ВВЕДИТЕ ТЕКСТ…",
@@ -515,7 +815,30 @@ const I18N = {
     optColors:"Случайные цвета", optSup:"Верхний индекс",
     optSeqPaste:"Последовательно при вставке", optMatrix:"Режим Matrix",
     secTheme:"Внешний вид", lblTheme:"Тёмный ↔ Светлый",
-    secReset:"Действия", resetBtn:"Очистить"
+    secReset:"Действия", resetBtn:"Очистить",
+    secColors:"Цвета",
+lblBackground:"Фон",
+lblForeground:"Текст",
+optMatrixGreen:"Зелёный",
+secExport:"Экспорт",
+bgBlack:"Чёрный",
+bgTrueGray:"Настоящий серый",
+bgAlt1:"Альтернативный фон",
+bgAlt2:"Альтернативный фон 2",
+
+fgMuted:"Приглушённый текст",
+fgText:"Текст",
+fgLink:"Ссылка",
+fgEpicBlue:"Эпический синий",
+fgSoftGreen:"Мягкий зелёный",
+fgOlive:"Оливковый",
+fgYellow:"Жёлтый",
+fgAlert:"Цвет предупреждения",
+fgOrange:"Оранжевый",
+fgLogoOrange:"Логотип оранжевый",
+fgLegacyPink:"Старый розовый",
+
+
   },
   zh:{
     htmlLang:"zh", title:"实时字形扰乱", placeholder:"输入文本…",
@@ -525,7 +848,30 @@ const I18N = {
     optColors:"随机颜色", optSup:"上标",
     optSeqPaste:"粘贴时顺序扰乱", optMatrix:"矩阵模式",
     secTheme:"外观", lblTheme:"暗 ↔ 亮",
-    secReset:"操作", resetBtn:"清空"
+    secReset:"操作", resetBtn:"清空",
+    secColors:"颜色",
+lblBackground:"背景",
+lblForeground:"文字",
+optMatrixGreen:"绿色",
+secExport:"导出",
+bgBlack:"黑色",
+bgTrueGray:"真实灰色",
+bgAlt1:"替代背景",
+bgAlt2:"替代背景 2",
+
+fgMuted:"弱化文本",
+fgText:"文本",
+fgLink:"链接",
+fgEpicBlue:"史诗蓝",
+fgSoftGreen:"柔和绿",
+fgOlive:"橄榄绿",
+fgYellow:"黄色",
+fgAlert:"警告颜色",
+fgOrange:"橙色",
+fgLogoOrange:"标志橙",
+fgLegacyPink:"旧粉色",
+
+
   },
   hi:{
     htmlLang:"hi", title:"रीयलटाइम ग्लिफ़ स्क्रैम्बल", placeholder:"पाठ दर्ज करें…",
@@ -535,7 +881,30 @@ const I18N = {
     optColors:"यादृच्छिक रंग", optSup:"सुपरस्क्रिप्ट",
     optSeqPaste:"पेस्ट पर क्रमिक", optMatrix:"मैट्रिक्स मोड",
     secTheme:"दिखावट", lblTheme:"डार्क ↔ लाइट",
-    secReset:"क्रियाएँ", resetBtn:"सब साफ़ करें"
+    secReset:"क्रियाएँ", resetBtn:"सब साफ़ करें",
+    secColors:"रंग",
+lblBackground:"पृष्ठभूमि",
+lblForeground:"पाठ",
+optMatrixGreen:"हरा",
+secExport:"निर्यात",
+bgBlack:"काला",
+bgTrueGray:"वास्तविक ग्रे",
+bgAlt1:"वैकल्पिक पृष्ठभूमि",
+bgAlt2:"वैकल्पिक पृष्ठभूमि 2",
+
+fgMuted:"मंद पाठ",
+fgText:"पाठ",
+fgLink:"लिंक",
+fgEpicBlue:"एपिक नीला",
+fgSoftGreen:"हल्का हरा",
+fgOlive:"जैतूनी हरा",
+fgYellow:"पीला",
+fgAlert:"चेतावनी रंग",
+fgOrange:"नारंगी",
+fgLogoOrange:"लोगो नारंगी",
+fgLegacyPink:"पुराना गुलाबी",
+
+
   },
   ja:{
     htmlLang:"ja", title:"リアルタイム・グリフスクランブル", placeholder:"テキストを入力…",
@@ -545,7 +914,30 @@ const I18N = {
     optColors:"ランダムカラー", optSup:"上付き",
     optSeqPaste:"貼り付け時に順次", optMatrix:"マトリックスモード",
     secTheme:"表示", lblTheme:"ダーク ↔ ライト",
-    secReset:"操作", resetBtn:"すべてクリア"
+    secReset:"操作", resetBtn:"すべてクリア",
+    secColors:"色",
+lblBackground:"背景",
+lblForeground:"テキスト",
+optMatrixGreen:"緑",
+secExport:"書き出し",
+bgBlack:"黒",
+bgTrueGray:"本物のグレー",
+bgAlt1:"代替背景",
+bgAlt2:"代替背景 2",
+
+fgMuted:"控えめなテキスト",
+fgText:"テキスト",
+fgLink:"リンク",
+fgEpicBlue:"エピックブルー",
+fgSoftGreen:"ソフトグリーン",
+fgOlive:"オリーブグリーン",
+fgYellow:"黄色",
+fgAlert:"警告色",
+fgOrange:"オレンジ",
+fgLogoOrange:"ロゴオレンジ",
+fgLegacyPink:"旧ピンク",
+
+
   }
 };
 
@@ -837,16 +1229,26 @@ function applyLang(l){
   document.title=t.title||"Realtime Glyph Scramble";
   input.placeholder=t.placeholder||"TEXT EINGEBEN…";
   document.querySelectorAll("[data-i18n]").forEach(el=>{
-    el.textContent=t[el.dataset.i18n] ?? "";
+el.textContent = t[el.dataset.i18n] ?? `[${el.dataset.i18n}]`;
+
   });
   speedLabel.textContent=`${t.speed}: ${speed}`;
   scrambleSizeLabel.textContent=`${t.scrambleSize}: ${scrambleSize.toFixed(2)}×`;
   randomTimeLabel.textContent=`${t.randomTime}: ${maxExtraTime.toFixed(1)} s`;
+  applySelectI18n(t);
+
 }
 applyLang("de");
 applyThemeMix();
+function applySelectI18n(t){
+  document.querySelectorAll("option[data-label-key]").forEach(opt=>{
+    const key = opt.dataset.labelKey;
+    opt.textContent = t[key] ?? `[${key}]`;
+  });
+}
 
-/* ================= EXPORT (VP8, no audio, FIREFOX-STABLE, +1s max, word wrap, speed-linked) ================= */
+/* ================= EXPORT (WebM VP8 / VP9, no audio, FIREFOX-STABLE) ================= */
+
 const exportOverlay=document.getElementById("exportOverlay");
 const exportPct=document.getElementById("exportPct");
 const exportBarInner=document.getElementById("exportBarInner");
@@ -1124,9 +1526,18 @@ ctx.textBaseline = "top";
   ctx.font = makeCanvasFont(S.fontFamilyUI, S.fontSizeBase, 300);
   const maxTextWidth = S.width - S.paddingLeft - S.paddingRight;
 
-  const { positions, usedLines } = layoutTokensToCharPositions(
-    ctx, text, maxTextWidth, S.letterSpacingPx, S.paddingLeft, S.paddingTop, S.lineHeightPx
-  );
+const { positions, usedLines } = layoutTokensToCharPositions(
+  ctx,
+  text,
+  maxTextWidth,
+  S.letterSpacingPx,
+  S.paddingLeft,
+  S.paddingTop,
+  S.lineHeightPx
+);
+
+
+
 const dynamicWidth = computeDynamicCanvasWidth(
   positions,
   ctx,
@@ -1134,17 +1545,25 @@ const dynamicWidth = computeDynamicCanvasWidth(
   S.paddingRight
 );
 
-// optional absichern
-canvas.width = Math.min(
-  Math.max(dynamicWidth, 200),  // min width
-  1920                         // max width (oder Infinity)
+canvas.width = Math.min(Math.max(dynamicWidth, 200), 1920);
+
+// ✅ stabile, CSS-nahe Höhenberechnung
+const maxY = positions.length
+  ? Math.max(...positions.map(p => p.y))
+  : S.paddingTop;
+
+// letzte belegte Zeile + eine Zeilenhöhe (damit die Zeile “unten” Platz hat)
+canvas.height = Math.ceil(
+  (maxY + S.lineHeightPx) + S.paddingBottom
 );
 
-  const height = Math.max(
-    60,
-    Math.ceil(S.paddingTop + usedLines * S.lineHeightPx + S.paddingBottom)
-  );
-  canvas.height = height;
+
+// 🔥 WICHTIG: NACH DEM LETZTEN RESIZE!
+ctx.textBaseline = "top";
+ctx.textAlign = "left";
+
+
+
 
   // Build per-char state aligned to positions (positions excludes '\n' chars)
   // Each char starts hidden until its startAtMs => NO cleartext frame
@@ -1153,22 +1572,24 @@ canvas.width = Math.min(
   const intervalForExtra = () => 1000 / Math.max(0.1, speed);
 
   // For speed-linking: each char advances scramble steps on schedule based on speed (like UI setTimeout)
-  const chars = positions.map((p, idx)=>{
-    const extraIterations = maxExtraTime>0
-      ? Math.floor(Math.random()*(maxExtraTime*1000/intervalForExtra()))
-      : 0;
-    return {
-      ch: p.ch,
-      x: p.x,
-      y: p.y,
-      startAtMs: idx * delayMsPerChar,
-      iter: 0,
-      maxIter: baseIterations + extraIterations,
-      locked: false,
-      lastStepMs: null, // for speed-linked stepping
-      lastDraw: null    // keep last scrambled glyph between steps
-    };
-  });
+const chars = positions.map((p, idx)=>{
+  const extraIterations = maxExtraTime>0
+    ? Math.floor(Math.random()*(maxExtraTime*1000/intervalForExtra()))
+    : 0;
+
+  return {
+    ch: p.ch,
+    x: p.x,
+y: p.y,
+    startAtMs: idx * delayMsPerChar,
+    iter: 0,
+    maxIter: baseIterations + extraIterations,
+    locked: false,
+    lastStepMs: null,
+    lastDraw: null
+  };
+});
+
 
   const stream = canvas.captureStream(FPS);
 const rec = new MediaRecorder(stream, {
@@ -1319,81 +1740,12 @@ a.download = `scramble_${codec}.webm`;
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 30000);
 }
-async function exportGif(){
-  showExportOverlay();
-
-  const FPS = 8;
-  const durationMs = 3000;
-  const frameCount = Math.floor((durationMs / 1000) * FPS);
-
-  const S = getExportStyleSnapshot();
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 480;
-  canvas.height = 260;
-  const ctx = canvas.getContext("2d");
-  ctx.textBaseline = "top";
-
-  const frames = [];
-
-  for(let i = 0; i < frameCount; i++){
-    ctx.fillStyle = S.bg;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    // ⚠️ bewusst simpel (stabil!)
-    ctx.fillStyle = S.fg;
-    ctx.font = `${S.fontSizeBase}px ${S.fontFamilyUI}`;
-    ctx.fillText(input.value || "", S.paddingLeft, S.paddingTop);
-
-    frames.push(canvas.toDataURL("image/png"));
-
-    const p = Math.round((i / frameCount) * 90);
-    exportPct.textContent = p + "%";
-    exportBarInner.style.width = p + "%";
-
-    // 🔑 Chromium braucht echten Yield
-    await new Promise(r => setTimeout(r, 20));
-  }
-
-  exportPct.textContent = "95%";
-  exportBarInner.style.width = "95%";
-
-  gifshot.createGIF({
-    images: frames,
-    gifWidth: canvas.width,
-    gifHeight: canvas.height,
-    interval: 1 / FPS,
-    numWorkers: 1,
-    sampleInterval: 10
-  }, function(result){
-    if(result.error){
-      hideExportOverlay();
-      alert("GIF Export fehlgeschlagen");
-      return;
-    }
-
-    exportPct.textContent = "100%";
-    exportBarInner.style.width = "100%";
-
-    const a = document.createElement("a");
-    a.href = result.image;
-    a.download = "scramble.gif";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setTimeout(hideExportOverlay, 200);
-  });
-}
-
 
 document.getElementById("exportVp8").onclick = () =>
   exportWebM("vp8");
 
 document.getElementById("exportVp9").onclick = () =>
   exportWebM("vp9");
-
-document.getElementById("exportGif").onclick = () => exportGif();
 
 
 </script>
